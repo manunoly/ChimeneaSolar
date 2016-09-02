@@ -13,12 +13,12 @@ clima = ClimaPropiedades()
 pared = ParedPropiedades()
 vidrio = VidrioPropiedades
 Tg = clima.Ta
-rangoTg = 5
+rangoTg = 2.0
 rangoSuperiorTg = Tg + rangoTg
 resultado = []
-To = Tg.__int__() + rangoTg.__int__()
-rangoTo = 50
-incremento = 0.05
+To = Tg + rangoTg
+rangoTo = 15.0
+incremento = 0.02
 fijoTo = False
 
 def matar_procesos(pid):
@@ -29,10 +29,15 @@ def matar_procesos(pid):
         print(child)
         child.kill()
     psutil.wait_procs(children, timeout=5)
-
-
-for i in range(To + 1, To + rangoTo):
+cant = 0
+i = To + 0.2
+limite = To + rangoTo
+while (i <= limite):
     piscina.append(Process(target=TareaCalcular(i, cola, fijoTo, incremento, rangoSuperiorTg, clima, pared, vidrio).run))
+    # print("proceso" + str(i))
+    i = i + 0.2
+    cant = cant + 1
+print("Creados " + str(cant) + " procesos")
 
 for proceso in piscina:
     proceso.start()
@@ -46,15 +51,7 @@ def terminarProcesos():
 
 timeEnd = 0
 while piscina:
-    if not cola.empty():
-        valorC = cola.get()
-        if valorC[0]:
-            valorF = valorC
-            matar_procesos(os.getpid())
-            break
-        else:
-            resultado.append(valorC)
-            terminarProcesos()
+    terminarProcesos()
     # Para no saturar, dormimos al padre durante 1 segundo
     #print("esperando a que los procesos hagan su trabajo")
     time.sleep(1)
@@ -68,12 +65,21 @@ while piscina:
 
 print("PADRE: todos los hijos han terminado, cierro")
 valorFinal = 100.0
-for valor in resultado:
+while not cola.empty():
+    valor = cola.get()
+    if abs(valor[1]) < 1:
+        print(valor)
     if abs(valor[1]) < abs(valorFinal):
         valorFinal = valor[1]
         datosF = valor
 
-print("To " + str(datosF[2]))
-print("Tg " + str(datosF[3]))
-print("Tf " + str(datosF[4]))
+print("La mejor Temp To " + str(datosF[2]))
+print("La mejor Temp Tg " + str(datosF[3]))
+print("La mejor Temp Tf " + str(datosF[4]))
+# aproximado, hw, sw, hrwg
 print("Valor de aproximación " + str(datosF[1]))
+
+tiempoActual = 3600
+# To1 = (sw -(hw *(To -Tf) - (hrwg * (To - Tg)) - ((kp / x) * (To - T1))) * ((2 * 3600) / (cpp * densp * x))) + To
+# T11 = (((pared.diff * tiempoActual) / x ** 2 ) * (T15 + To - (2 * T1))) + T1
+# T15_1 = ((((pared.k / pared.x) * (T1 - T15)) - (clima.hwind * (clima.T15 - clima.Ta)) - (hrws * (clima.T15 - clima.Ts))) * ((2 * tiempoActual) / (pared.densp * pared.cpp * pared.x))) + T15

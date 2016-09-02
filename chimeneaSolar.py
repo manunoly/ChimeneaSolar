@@ -84,8 +84,10 @@ class ChimeneaSolar:
         # variar Tf comenzar con Tg y terminar con To pq siempre tiene q estar en este rango.
 
         aproximado = sg + (hg * (Tf - Tg)) + (hrwg * (To - Tg)) - (self.__climaP.hwind * (Tg - self.__climaP.Ta)) - (hrgs * (Tg - self.__climaP.Ts))
-        return aproximado
-
+        data = [aproximado, hw, sw, hrwg]
+        return data
+        # return aproximado
+    #
     # hw    coeficiente de conveccion de la pared y el aire
     # hg    coeficiente de conveccion del vidrio y el aire
         # para calcular hg hay q calcular primero la Tm temperetura media y luego las propiedades del aire y luego se calcula el Ra(Raile)
