@@ -1,5 +1,6 @@
 __author__ = 'manuel'
 from chimeneaSolar import ChimeneaSolar
+from decimal import *
 
 class TareaCalcular:
 
@@ -22,6 +23,7 @@ class TareaCalcular:
         self.__cola.put([convergeB, temp[0], temp[1], temp[2], temp[3], temp[4]])
 
     def run(self):
+        getcontext().prec = 6
         menorValor = 100.0
         chimenea = ChimeneaSolar(self.__clima, self.__pared, self.__vidrio)
         temperaturas = []
@@ -31,17 +33,18 @@ class TareaCalcular:
             vueltasTo = 0
             vueltasTg = 0
             To = self.__cid
-            rangoInferiorTo = round(To - self.variacionProceso, 3)
-            while round(To, 3) > rangoInferiorTo:
+            rangoInferiorTo = To - self.variacionProceso
+
+            while To > rangoInferiorTo:
                 # print("To " + str(To))
-                vueltasTo = vueltasTo + 1
+                # vueltasTo = vueltasTo + 1
 
                 Tg = self.__clima.Ta
-                while round(Tg, 3) <= self.__rangoSuperiorTg:
+                while Tg <= self.__rangoSuperiorTg:
                     Tf = Tg
-                    vueltasTg = vueltasTg + 1
+                    # vueltasTg = vueltasTg + 1
                     # print("__tg " + str(Tg))
-                    while round(Tf,3) <= round(To, 3):
+                    while Tf <= To:
                         # print("_____tf " + str(Tf))
                         vueltas = vueltas + 1
                         a = chimenea.calcular(To, Tg, Tf)

@@ -6,23 +6,27 @@ from tareaCalcularProcesos import TareaCalcular
 from clima import ClimaPropiedades
 from paredPropiedades import ParedPropiedades
 from vidrioPropiedades import VidrioPropiedades
+from decimal import *
+
+
+getcontext().prec = 6
 
 cola = Queue()
+colaT = Queue()
 piscina = []
 clima = ClimaPropiedades()
 pared = ParedPropiedades()
 vidrio = VidrioPropiedades
 Tg = clima.Ta
-rangoTg = 2.0
+rangoTg = Decimal(2)
 rangoSuperiorTg = Tg + rangoTg
 resultado = []
-
 To = Tg + rangoTg
-rangoTo = 20.0
-incremento = 0.05
+rangoTo = 15
+incremento = Decimal(0.05)
 fijoTo = False
 cant = 0
-variacionProceso = 0.5
+variacionProceso = Decimal(1)
 
 def matar_procesos(pid):
     parent = psutil.Process(pid)
@@ -32,13 +36,13 @@ def matar_procesos(pid):
         print(child)
         child.kill()
     psutil.wait_procs(children, timeout=5)
+i = Decimal(To + variacionProceso)
+limite = Decimal(To + rangoTo)
 
-i = To + variacionProceso
-limite = To + rangoTo
-while (round(i ,3) <= limite):
+while (i <= limite):
     piscina.append(Process(target=TareaCalcular(i, cola, fijoTo, incremento, rangoSuperiorTg, clima, pared, vidrio, variacionProceso).run))
     # print("proceso " + str(i))
-    i = i + variacionProceso
+    i = i + Decimal(variacionProceso)
     cant = cant + 1
 print("Creados " + str(cant) + " procesos")
 
@@ -59,7 +63,7 @@ while piscina:
     #print("esperando a que los procesos hagan su trabajo")
     time.sleep(2)
     timeEnd = timeEnd + 2
-    if timeEnd > 250:
+    if timeEnd > 350:
         print("Tiempo límite exedido de 150 segundos, Fuerzo el cierre!!")
         terminarProcesos()
         time.sleep(1)
@@ -79,7 +83,7 @@ while not cola.empty():
         valorFinal = valor[1]
         datosF = valor
 print(cantV)
-exit()
+
 print("La mejor Temp To " + str(datosF[2]))
 print("La mejor Temp Tg " + str(datosF[3]))
 print("La mejor Temp Tf " + str(datosF[4]))

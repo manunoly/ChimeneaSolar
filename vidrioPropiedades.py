@@ -1,27 +1,29 @@
 __author__ = 'manuel'
+from decimal import *
+getcontext().prec = 6
 
 class VidrioPropiedades:
 
 
     #propiedades del vidrio
-    T = 0.84 #transmitancia
-    absortancia = .0 # absortancia
-    ev = 0.8 #Emisividad
-    alphav = 0.006
+    T = Decimal(0.84) #transmitancia
+    absortancia = Decimal(0) # absortancia
+    ev = Decimal(0.8) #Emisividad
+    alphav = Decimal(0.006)
 
 
     #propiedades vidrio - aire
 
-    ufva = .0 #viscocidad cinematica del vidrio-aire
-    densva = .0 # densidad del vidrio aire
-    condva = .0 # conductividad del vidrio aire
-    cpva = .0  # calor especifico
-    betava =.0
-    deltava =.0
-    prva =.0
-    vfva  = .0
-    grva = .0
-    rava = .0
-    nusseltva  = .0
-    hg = .0
-    tmva = .0 #temp media
+    ufva = Decimal(0) #viscocidad cinematica del vidrio-aire
+    densva = Decimal(0) # densidad del vidrio aire
+    condva = Decimal(0) # conductividad del vidrio aire
+    cpva = Decimal(0)  # calor especifico
+    betava = Decimal(0)
+    deltava = Decimal(0)
+    prva = Decimal(0)
+    vfva  = Decimal(0)
+    grva = Decimal(0)
+    rava = Decimal(0)
+    nusseltva  = Decimal(0)
+    hg = Decimal(0)
+    tmva = Decimal(0) #temp media

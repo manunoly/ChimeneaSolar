@@ -1,30 +1,32 @@
 __author__ = 'manuel'
+from decimal import *
 
 
 class ChimeneaSolar:
     ## Constante
-    SteffanBoltzmann = 0.0000000567
+    getcontext().prec = 6
+    SteffanBoltzmann = Decimal(0.0000000567)
     #temp pared del extremo inicial, puede ser una constante o toca investigar como hacer su calculo inicial. la T1 va variando con el tiempo.
     #valor inicial
-    T1 = 308.0
+    T1 = Decimal(308)
     #temp pared otro extremo puede ser una constante o toca investigar como hacer su calculo inicial. la T15 va variando con el tiempo. 308 valor inicial luego se calcula
-    T15 = 308.0
+    T15 = Decimal(308.0)
     #valor cuando varia la temperatura, seria en la proxima hora.
     #T15 = ((((k / x)*(T1 - T15[0])) - (hwind * (T15[0] - Ta[0]))))
 
     def __init__(self, clima, pared, vidrio):
-
         self.__vidrioP = vidrio
         self.__paredP = pared
         self.__climaP = clima
 
     #aberturas de ingreso y salida del aire
-    ancho = .0
-    largo = .0
+    ancho = Decimal(0)
+    largo = Decimal(0)
 
     def calcular(self,To,Tg,Tf):
 
-
+        # data = [To - Decimal(Tg), 1, 2, 3]
+        # return data
         # Calculo de Sw calor de radiacion
         sw = self.__vidrioP.T * self.__paredP.alphap * self.__climaP.radicacion
         # Calcular Sg calor de radiacion en el vidrio
@@ -35,46 +37,46 @@ class ChimeneaSolar:
         # hrwg  coeficiente de radiacion entre la pared y el vidrio
         # hrgs  coeficiente de radiacion entre el vidrio y el ambiente
         # hrws  coeficiente de radiacion entre la pared y el ambiente
-        hrwg =  self.SteffanBoltzmann * (((Tg ** 2 + To ** 2)* (Tg + To))/((1/self.__vidrioP.ev)+(1/self.__paredP.ep)-1))
-        hrgs = (self.SteffanBoltzmann * self.__vidrioP.ev) * (Tg + self.__climaP.Ts) * (Tg ** 2 + self.__climaP.Ts ** 2)
+        hrwg =  self.SteffanBoltzmann * (((Tg ** Decimal(2) + To ** Decimal(2))* (Tg + To))/((Decimal(1)/self.__vidrioP.ev)+(Decimal(1)/self.__paredP.ep)- Decimal(1)))
+        hrgs = (self.SteffanBoltzmann * self.__vidrioP.ev) * (Tg + self.__climaP.Ts) * (Tg ** Decimal(2) + self.__climaP.Ts ** Decimal(2))
         #hrws = (self.SteffanBoltzmann * self.__paredP.ep) * (T15 + self.__climaP.Ts) * (T15 ** 2 + self.__climaP.Ts ** 2)
 
         #vamos a calcular las propiedades del vidrio - aire
-        tmva = (Tg + Tf)/2
-        ufva = (1.846 + (0.00472 * (tmva - 300))) * 10 ** -5
-        densva = (1.1614 - (0.00353 * (tmva - 300)))
-        condva = (0.0263 + (0.000074 * (tmva - 300)))
-        cpva = (1.007 + (0.00004 * (tmva -300))) * 10 ** 3
-        betava = 1.0/tmva
+        tmva = (Tg + Tf)/Decimal(2)
+        ufva = (Decimal(1.846) + (Decimal(0.00472) * (tmva - Decimal(300)))) * Decimal(10) ** Decimal(-5)
+        densva = (Decimal(1.1614) - (Decimal(0.00353) * (tmva - Decimal(300))))
+        condva = (Decimal(0.0263) + (Decimal(0.000074) * (tmva - Decimal(300))))
+        cpva = (Decimal(1.007) + (Decimal(0.00004) * (tmva - Decimal(300)))) * Decimal(10) ** Decimal(3)
+        betava = Decimal(1)/tmva
 
-        deltava = abs(Tg - Tf)
+        deltava = Decimal(abs(Tg - Tf))
         prva = (ufva * cpva) / condva
         vfva = ufva / densva
-        grva = (9.8 * betava * deltava * (self.__paredP.l ** 3)) / (vfva ** 2)
+        grva = (Decimal(9.8) * betava * deltava * (self.__paredP.l ** Decimal(3))) / (vfva ** Decimal(2))
         rava = prva * grva
-        if rava < 10 ** 9:
-            nusseltva = 0.68 + (0.67 * rava ** (1.0/4)) / (1 + (0.492 / prva) ** (9.0 / 16)) ** (4.0 /9)
+        if rava < Decimal(10) ** Decimal(9):
+            nusseltva = Decimal(0.68) + (Decimal(0.67) * rava ** (Decimal(1)/Decimal(4))) / (Decimal(1) + (Decimal(0.492) / prva) ** (Decimal(9) / Decimal(16))) ** (Decimal(4) /Decimal(9))
         else:
-            nusseltva = (0.825 + (0.387 * (rava ** (1/6))) / (1 + (0.492 / prva) **(9.0/16)) **(8.0 /27)) ** 2
+            nusseltva = (Decimal(0.825) + (Decimal(0.387) * (rava ** (Decimal(1)/Decimal(6)))) / (Decimal(1) + (Decimal(0.492) / prva) **(Decimal(9)/Decimal(16))) **(Decimal(8) / Decimal(27))) ** Decimal(2)
 
         hg = (nusseltva * condva) / self.__paredP.l
 
         # vamos a calcular las propiedades de la pared - aire
-        tmpa = (Tf + To) / 2
-        ufpa = (1.846 + (0.00472 * (tmpa - 300))) * 10 ** -5
-        denspa = (1.1614 - (0.00353 * (tmpa - 300)))
-        condpa = (0.0263 + (0.000074 * (tmpa - 300)))
-        cppa = (1.007 + (0.00004 * (tmpa -300))) * 10 ** 3
-        betapa = 1.0/tmpa
-        deltapa = abs(To - Tf)
+        tmpa = (Tf + To) / Decimal(2)
+        ufpa = (Decimal(1.846) + (Decimal(0.00472) * (tmpa - Decimal(300)))) * Decimal(10) ** Decimal(-5)
+        denspa = (Decimal(1.1614) - (Decimal(0.00353) * (tmpa - Decimal(300))))
+        condpa = (Decimal(0.0263) + (Decimal(0.000074) * (tmpa - Decimal(300))))
+        cppa = (Decimal(1.007) + (Decimal(0.00004) * (tmpa - Decimal(300)))) * Decimal(10) ** Decimal(3)
+        betapa = Decimal(1)/tmpa
+        deltapa = Decimal(abs(To - Tf))
         prpa = (ufpa * cppa) / condpa
         vfpa = ufpa / denspa
-        grpa = (9.8 * betapa * deltapa * (self.__paredP.l ** 3)) / (vfpa ** 2)
+        grpa = (Decimal(9.8) * betapa * deltapa * (self.__paredP.l ** Decimal(3))) / (vfpa ** Decimal(2))
         rapa = prpa * grpa
-        if rapa < 10 ** 9:
-            nusseltpa = 0.68 + (0.67 * rapa ** (1.0/4)) / (1 + (0.492 / prpa) ** (9.0 / 16)) ** (4.0 /9)
+        if rapa < Decimal(10) ** Decimal(9):
+            nusseltpa = Decimal(0.68) + (Decimal(0.67) * rapa ** (Decimal(1)/Decimal(4))) / (Decimal(1) + (Decimal(0.492) / prpa) ** (Decimal(9) / Decimal(16))) ** (Decimal(4) / Decimal(9))
         else:
-            nusseltpa = (0.825 + (0.387 * (rapa ** (1/6))) / (1 + (0.492 / prpa) **(9.0/16)) **(8.0 /27)) ** 2
+            nusseltpa = (Decimal(0.825) + (Decimal(0.387) * (rapa ** (Decimal(1)/Decimal(6)))) / (Decimal(1) + (Decimal(0.492) / prpa) **(Decimal(9)/Decimal(16))) **(Decimal(8) / Decimal(27))) ** Decimal(2)
 
         hw = (nusseltpa * condpa) / self.__paredP.l
 
