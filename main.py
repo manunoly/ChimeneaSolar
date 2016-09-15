@@ -6,6 +6,7 @@ from tareaCalcularProcesos import TareaCalcular
 from clima import ClimaPropiedades
 from paredPropiedades import ParedPropiedades
 from vidrioPropiedades import VidrioPropiedades
+from chimeneaSolar import ChimeneaSolar
 from decimal import *
 
 
@@ -17,16 +18,18 @@ piscina = []
 clima = ClimaPropiedades()
 pared = ParedPropiedades()
 vidrio = VidrioPropiedades
+chimenea = ChimeneaSolar(clima, pared, vidrio)
+
 Tg = clima.Ta
 rangoTg = Decimal(2)
 rangoSuperiorTg = Tg + rangoTg
 resultado = []
 To = Tg + rangoTg
-rangoTo = 15
+rangoTo = 1
 incremento = Decimal(0.05)
 fijoTo = False
 cant = 0
-variacionProceso = Decimal(1)
+variacionProceso = Decimal(0.1)
 
 def matar_procesos(pid):
     parent = psutil.Process(pid)
@@ -40,9 +43,9 @@ i = Decimal(To + variacionProceso)
 limite = Decimal(To + rangoTo)
 
 while (i <= limite):
-    piscina.append(Process(target=TareaCalcular(i, cola, fijoTo, incremento, rangoSuperiorTg, clima, pared, vidrio, variacionProceso).run))
+    piscina.append(Process(target=TareaCalcular(i, cola, fijoTo, incremento, rangoSuperiorTg, clima, pared, vidrio, variacionProceso, chimenea).run))
     # print("proceso " + str(i))
-    i = i + Decimal(variacionProceso)
+    i = i + variacionProceso
     cant = cant + 1
 print("Creados " + str(cant) + " procesos")
 
@@ -74,16 +77,25 @@ while piscina:
 valorFinal = 100.0
 menores = []
 cantV = 0
+cantV1 = 0
+hilos = 0
 while not cola.empty():
+    hilos = hilos + 1
     valor = cola.get()
     cantV = cantV + valor[0]
-    if abs(valor[1]) < 1:
-        menores.append(valor)
-    if abs(valor[1]) < abs(valorFinal):
-        valorFinal = valor[1]
-        datosF = valor
-print(cantV)
+    cantV1 = cantV1 + valor[1]
+    # continue
+    # if abs(valor[1]) < 1:
+    #     menores.append(valor)
+    # if abs(valor[1]) < abs(valorFinal):
+    #     valorFinal = valor[1]
+    #     datosF = valor
 
+print(cantV)
+print(cantV1.__int__())
+print(hilos)
+
+exit()
 print("La mejor Temp To " + str(datosF[2]))
 print("La mejor Temp Tg " + str(datosF[3]))
 print("La mejor Temp Tf " + str(datosF[4]))

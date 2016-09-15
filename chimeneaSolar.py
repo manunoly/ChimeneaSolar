@@ -25,8 +25,8 @@ class ChimeneaSolar:
 
     def calcular(self,To,Tg,Tf):
 
-        # data = [To - Decimal(Tg), 1, 2, 3]
-        # return data
+        data = [To + Tg + Tf, 1, 2, 3]
+        return data
         # Calculo de Sw calor de radiacion
         sw = self.__vidrioP.T * self.__paredP.alphap * self.__climaP.radicacion
         # Calcular Sg calor de radiacion en el vidrio
