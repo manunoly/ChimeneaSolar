@@ -10,7 +10,7 @@ from chimeneaSolar import ChimeneaSolar
 from decimal import *
 
 
-getcontext().prec = 6
+getcontext().prec = 10
 
 cola = Queue()
 colaT = Queue()
@@ -20,16 +20,16 @@ pared = ParedPropiedades()
 vidrio = VidrioPropiedades
 chimenea = ChimeneaSolar(clima, pared, vidrio)
 
-Tg = clima.Ta
-rangoTg = Decimal(2)
+Tg = Decimal(clima.Ta)
+rangoTg = Decimal(3)
 rangoSuperiorTg = Tg + rangoTg
 resultado = []
-To = Tg + rangoTg
-rangoTo = 1
-incremento = Decimal(0.05)
+To = rangoSuperiorTg
+rangoTo = Decimal(10)
+incremento = Decimal(0.02)
 fijoTo = False
 cant = 0
-variacionProceso = Decimal(0.1)
+variacionProceso = incremento
 
 def matar_procesos(pid):
     parent = psutil.Process(pid)
@@ -39,18 +39,19 @@ def matar_procesos(pid):
         print(child)
         child.kill()
     psutil.wait_procs(children, timeout=5)
-i = Decimal(To + variacionProceso)
+i = To
 limite = Decimal(To + rangoTo)
 
-while (i <= limite):
-    piscina.append(Process(target=TareaCalcular(i, cola, fijoTo, incremento, rangoSuperiorTg, clima, pared, vidrio, variacionProceso, chimenea).run))
+while (limite >= i):
+    piscina.append(Process(target=TareaCalcular(limite, cola, fijoTo, incremento, rangoSuperiorTg, clima, pared, vidrio, variacionProceso, chimenea).run))
     # print("proceso " + str(i))
-    i = i + variacionProceso
+    piscina[piscina.__len__() - 1].start()
+    limite = limite - variacionProceso
     cant = cant + 1
 print("Creados " + str(cant) + " procesos")
 
-for proceso in piscina:
-    proceso.start()
+# for proceso in piscina:
+#     proceso.start()
 
 def terminarProcesos():
     for proceso in piscina:
@@ -66,10 +67,9 @@ while piscina:
     #print("esperando a que los procesos hagan su trabajo")
     time.sleep(2)
     timeEnd = timeEnd + 2
-    if timeEnd > 350:
+    if timeEnd > 450:
         print("Tiempo límite exedido de 150 segundos, Fuerzo el cierre!!")
         terminarProcesos()
-        time.sleep(1)
         matar_procesos(os.getpid())
         break
 
@@ -80,29 +80,24 @@ cantV = 0
 cantV1 = 0
 hilos = 0
 while not cola.empty():
-    hilos = hilos + 1
     valor = cola.get()
-    cantV = cantV + valor[0]
-    cantV1 = cantV1 + valor[1]
-    # continue
-    # if abs(valor[1]) < 1:
-    #     menores.append(valor)
-    # if abs(valor[1]) < abs(valorFinal):
-    #     valorFinal = valor[1]
-    #     datosF = valor
+    if abs(valor[1]) < 1:
+        menores.append(valor)
+    if abs(valor[1]) < abs(valorFinal):
+        valorFinal = valor[1]
+        datosF = valor
+if('datosF' in locals()):
+    print("La mejor Temp To " + str(datosF[2]))
+    print("La mejor Temp Tg " + str(datosF[3]))
+    print("La mejor Temp Tf " + str(datosF[4]))
+    # aproximado, hw, sw, hrwg
+    print("Valor de aproximación " + str(datosF[1]))
+else:
+    print("No existen resultados aceptables para mostrar")
+    exit()
 
-print(cantV)
-print(cantV1.__int__())
-print(hilos)
-
-exit()
-print("La mejor Temp To " + str(datosF[2]))
-print("La mejor Temp Tg " + str(datosF[3]))
-print("La mejor Temp Tf " + str(datosF[4]))
-# aproximado, hw, sw, hrwg
-print("Valor de aproximación " + str(datosF[1]))
-
-
+for menor in menores:
+    print(str(menor[0]) + "   " + str(menor[2]) + "   " + str(menor[3]) + "   " + str(menor[4]))
 
 tiempoActual = 3600
 # To1 = (sw -(hw *(To -Tf) - (hrwg * (To - Tg)) - ((kp / x) * (To - T1))) * ((2 * 3600) / (cpp * densp * x))) + To

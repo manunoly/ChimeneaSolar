@@ -23,7 +23,7 @@ class TareaCalcular:
         self.__cola.put([convergeB, temp[0], temp[1], temp[2], temp[3], temp[4]])
 
     def run(self):
-        getcontext().prec = 6
+        getcontext().prec = 10
         menorValor = 100.0
         temperaturas = []
 
@@ -32,34 +32,35 @@ class TareaCalcular:
             vueltasTo = 0
             vueltasTg = 0
             To = self.__cid
-            rangoInferiorTo = To - self.variacionProceso
+            # rangoInferiorTo = To - self.variacionProceso
             total = 0
 
-            while To > rangoInferiorTo:
-                # print("To " + str(To))
-                # vueltasTo = vueltasTo + 1
-                Tg = self.__clima.Ta
-                while Tg <= self.__rangoSuperiorTg:
-                    Tf = Tg
-                    # vueltasTg = vueltasTg + 1
-                    # print("__tg " + str(Tg))
-                    while Tf <= To:
-                        # print("_____tf " + str(Tf))
-                        vueltas = vueltas + 1
-                        a = self.__chimenea.calcular(To, Tg, Tf)
-                        total = total + a[0]
-                        # if abs(a[0]) < menorValor:
-                        #     menorValor = a[0]
-                        #     temperaturas = [menorValor, To, Tg , Tf, a]
-                        Tf = Tf + self.__incremento
-                    Tg = Tg + self.__incremento
-                To = To - self.__incremento
-                # temperaturas = [menorValor, To, Tg , Tf, a]
-            temperaturas = [total, To, Tg , Tf, a]
+            # while To > rangoInferiorTo:
+            #     # vueltasTo = vueltasTo + 1
+            Tg = Decimal(self.__clima.Ta)
+            while Tg <= self.__rangoSuperiorTg:
+                # print("Tg " + str(Tg))
+                Tf = Tg
+                # vueltasTg = vueltasTg + Tg
+                # vueltas = vueltas + 1
+                while Tf <= To:
+                    a = self.__chimenea.calcular(float(To), float(Tg), float(Tf))
+                    total = total + a[0]
+                    if abs(a[0]) < menorValor:
+                        menorValor = a[0]
+                        temperaturas = [menorValor, To, Tg , Tf]
+                    Tf = Tf + self.__incremento
+                Tg = Tg + self.__incremento
+            # To = To - self.__incremento
+                    # temperaturas = [menorValor, To, Tg , Tf, a]
+            # print("__to " + str(To))
+            # print("__sumaTg " + str(vueltasTg))
+            # print("__vueltasTg " + str(vueltas))
+            # temperaturas = [vueltasTg, To, Tg , Tf, a]
 
             # print(str(self.__cid) + " Rango Inferior " + str(rangoInferiorTo) +" Vueltas  " + str(vueltas) + " Valores Finale To " + str(vueltasTo) + " Tg " + str(vueltasTg) + " Tf " + str(vueltas))
 
-            # if menorValor != 100.0:
-            self.__cola.put([vueltas, temperaturas[0], temperaturas[1], temperaturas[2], temperaturas[3], temperaturas[4]])
+            if menorValor != 100.0:
+                self.__cola.put([menorValor, temperaturas[0], temperaturas[1], temperaturas[2], temperaturas[3]])
                 # self.convergen(False, temperaturas)
 
