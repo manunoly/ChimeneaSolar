@@ -6,6 +6,9 @@ class ChimeneaSolar:
     ## Constante
     getcontext().prec = 10
     SteffanBoltzmann = float(0.0000000567)
+    sw = 0
+    hw = 0
+    hrwg = 0
     #temp pared del extremo inicial, puede ser una constante o toca investigar como hacer su calculo inicial. la T1 va variando con el tiempo.
     #valor inicial
     T1 = float(308)
@@ -28,7 +31,7 @@ class ChimeneaSolar:
         # data = [To + Tg + Tf, 1, 2, 3]
         # return data
         # Calculo de Sw calor de radiacion
-        sw = self.__vidrioP.T * self.__paredP.alphap * self.__climaP.radicacion
+        self.sw = self.__vidrioP.T * self.__paredP.alphap * self.__climaP.radicacion
         # Calcular Sg calor de radiacion en el vidrio
         # la radiacion va variando a cada hora segun condiciones climaticas
         sg = self.__vidrioP.alphav * self.__climaP.radicacion
@@ -37,7 +40,7 @@ class ChimeneaSolar:
         # hrwg  coeficiente de radiacion entre la pared y el vidrio
         # hrgs  coeficiente de radiacion entre el vidrio y el ambiente
         # hrws  coeficiente de radiacion entre la pared y el ambiente
-        hrwg =  round(self.SteffanBoltzmann * (((Tg ** float(2) + To ** float(2))* (Tg + To))/((float(1)/self.__vidrioP.ev)+(float(1)/self.__paredP.ep)- float(1))),5)
+        self.hrwg =  round(self.SteffanBoltzmann * (((Tg ** float(2) + To ** float(2))* (Tg + To))/((float(1)/self.__vidrioP.ev)+(float(1)/self.__paredP.ep)- float(1))),5)
         hrgs = round(self.SteffanBoltzmann * self.__vidrioP.ev) * (Tg + self.__climaP.Ts) * (Tg ** float(2) + self.__climaP.Ts ** float(2))
         #hrws = (self.SteffanBoltzmann * self.__paredP.ep) * (T15 + self.__climaP.Ts) * (T15 ** 2 + self.__climaP.Ts ** 2)
 
@@ -78,15 +81,15 @@ class ChimeneaSolar:
         else:
             nusseltpa = (float(0.825) + (float(0.387) * (rapa ** (float(1)/float(6)))) / (float(1) + (float(0.492) / prpa) **(float(9)/float(16))) **(float(8) / float(27))) ** float(2)
 
-        hw = (nusseltpa * condpa) / self.__paredP.l
+        self.hw = (nusseltpa * condpa) / self.__paredP.l
 
         #hay q variar To, Tg, Tf para que aproximado de 0
         # variar To, comenzar con temp ambiental y variar 50 mas
         # variar Tg comenzar con temp ambiental  y variar 2 mas
         # variar Tf comenzar con Tg y terminar con To pq siempre tiene q estar en este rango.
 
-        aproximado = float(sg + (hg * (Tf - Tg)) + (hrwg * (To - Tg)) - (self.__climaP.hwind * (Tg - self.__climaP.Ta)) - (hrgs * (Tg - self.__climaP.Ts)))
-        data = [round(aproximado, 5), hw, sw, hrwg]
+        aproximado = float(sg + (hg * (Tf - Tg)) + (self.hrwg * (To - Tg)) - (self.__climaP.hwind * (Tg - self.__climaP.Ta)) - (hrgs * (Tg - self.__climaP.Ts)))
+        data = [round(aproximado, 5), self.hw, self.sw, self.hrwg]
         return data
         # return aproximado
     #
