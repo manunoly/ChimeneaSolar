@@ -1,4 +1,5 @@
 __author__ = 'manuel'
+#moviendo a parte el manejador de los procesos.
 
 from multiprocessing import Process, Queue
 import psutil
