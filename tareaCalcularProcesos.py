@@ -44,11 +44,11 @@ class TareaCalcular:
                 # vueltasTg = vueltasTg + Tg
                 # vueltas = vueltas + 1
                 while Tf <= To:
-                    a = self.__chimenea.calcular(float(To), float(Tg), float(Tf))
+                    a = self.__chimenea.calcular(Decimal(To), Decimal(Tg), Decimal(Tf))
                     vueltas = vueltas + 1
                     if abs(a[0]) < menorValor:
                         menorValor = a[0]
-                        temperaturas = [menorValor, To, Tg , Tf]
+                        temperaturas = [vueltas, menorValor, To, Tg , Tf, a[0], a[1], a[2], a[3], a[4]]
                     Tf = Tf + self.__incremento
                 Tg = Tg + self.__incremento
             # To = To - self.__incremento
@@ -61,6 +61,6 @@ class TareaCalcular:
             # print(str(self.__cid) + " Rango Inferior " + str(rangoInferiorTo) +" Vueltas  " + str(vueltas) + " Valores Finale To " + str(vueltasTo) + " Tg " + str(vueltasTg) + " Tf " + str(vueltas))
 
             if menorValor != 100.0:
-                self.__cola.put([vueltas, temperaturas[0], temperaturas[1], temperaturas[2], temperaturas[3]])
+                self.__cola.put(temperaturas)
                 # self.convergen(False, temperaturas)
 

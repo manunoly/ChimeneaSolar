@@ -13,7 +13,7 @@ while piscina:
     time.sleep(2)
     procesos.terminarProcesos(piscina)
     timeEnd = timeEnd + 2
-    if timeEnd > 650:
+    if timeEnd > 250:
         print("Tiempo límite exedido de 150 segundos, Fuerzo el cierre!!")
         procesos.terminarProcesos()
         procesos.matar_procesos(os.getpid())
@@ -29,7 +29,7 @@ while not cola.empty():
     if abs(valor[1]) < abs(valorFinal):
         valorFinal = valor[1]
         datosF = valor
-        if abs(valor[1]) < 1:
+        if abs(valor[1]) < 0.1:
             menores.append(valor)
 
 if('datosF' in locals()):
@@ -47,3 +47,5 @@ if menores.__len__() >= 1:
     for menor in menores:
         print(str(menor[1]) + "   " + str(menor[2]) + "   " + str(menor[3]) + "   " + str(menor[4]))
 
+#vueltas, menorValor, To, Tg , Tf,round(aproximado, 5), hw, sw, hrwg, hg
+procesos.calcularFlujoMasico(menores)
