@@ -26,8 +26,7 @@ class Procesos:
             chimenea = ChimeneaSolar(clima, pared, vidrio)
         self.chimenea = chimenea
 
-    def matar_procesos(pid):
-
+    def matar_procesos(self, pid):
         parent = psutil.Process(pid)
         children = parent.get_children(recursive=True)
 
@@ -43,7 +42,7 @@ class Procesos:
                 piscina.remove(proceso)
                 del(proceso)
 
-    def iniciarProcesos(self, cola, incremento = None, Tg = None, rangoTg = None, rangoTo = None):
+    def iniciarProcesos(self, cola, incremento = None, To = None,  Tg = None, rangoTg = None, rangoTo = None):
         piscina = []
         if cola is None:
             cola = Queue
@@ -53,7 +52,8 @@ class Procesos:
             rangoTg = Decimal(2)
         rangoSuperiorTg = Tg + rangoTg
         resultado = []
-        To = rangoSuperiorTg
+        if To is None:
+            To = rangoSuperiorTg
         if rangoTo is None:
             rangoTo = Decimal(12)
         if incremento is None:
@@ -75,6 +75,7 @@ class Procesos:
 
     def calcularFlujoMasico(self,datosM):
         #vueltas, menorValor, To, Tg , Tf,round(aproximado, 5), hw, sw, hrwg, hg
+        print("Calculando Flujo Masico, probando " + str(datosM.__len__()))
         valores = []
         for datos in datosM:
             hw = Decimal(datos[6])
@@ -85,7 +86,7 @@ class Procesos:
             mejorFlujoMasico = 0
             flujoMasicoO = 10
             valorVariar = Decimal(1)
-            flujoMasicoT = 20
+            flujoMasicoT = 30
             while valorVariar < 31:
                 flujoMasico = (hw * (To - Tf)) - (hg * (Tf - Tg)) - (valorVariar * (Tf - Decimal(self.clima.Ta)))
                 if abs(flujoMasico) < flujoMasicoT:
@@ -97,12 +98,15 @@ class Procesos:
                 valores.append([flujoMasicoO, mejorFlujoMasico, datos])
         valoresM = sorted(valores, key = lambda x: abs(x[0]))
 
-        for mejores in valoresM:
-            print(mejores)
+        if valoresM.__len__() >= 1:
+            mejores = valoresM[0]
             Tf = Decimal(mejores[2][4])
-            Cf = (Decimal(1.007) + Decimal(0.00004) * (Tf - Decimal(300))) * Decimal(10) ** Decimal(3)
-            flujoMasicoFinal = mejorFlujoMasico * Decimal(0.75) * Decimal(self.pared.W) * Decimal(self.pared.l) / Decimal(Cf)
-            print(flujoMasicoFinal)
+            Cf = (Decimal(1.007) + Decimal(0.00004) * (Decimal(Tf) - Decimal(300))) * Decimal(10) ** Decimal(3)
+            print(Cf)
+            flujoMasicoFinal = (Decimal(mejorFlujoMasico) * Decimal(0.75) * Decimal(self.pared.W) * Decimal(self.pared.l)) / Decimal(Cf)
+            mejores.append(flujoMasicoFinal)
+            return mejores
+        return None
 
     def calcularSegundaFase(self, To, Tg, Tf):
         tiempoActual = 3600
@@ -110,6 +114,6 @@ class Procesos:
         To1 = (self.chimenea.sw -(self.chimenea.hw *(To -Tf) - (self.chimenea.hrwg * (To - Tg)) - ((self.pared.kp / self.pared.x) * (To - self.clima.T1))) * ((2 * 3600) / (self.pared.cpp * self.pared.densp * self.pared.x))) + To
         T11 = (((self.pared.diff * tiempoActual) / self.pared.x ** 2 ) * (self.clima.T15 + To - (2 * self.clima.T1))) + self.clima.T1
         T15_1 = ((((self.pared.k / self.pared.x) * (self.clima.T1 - self.clima.T15)) - (self.clima.hwind * (self.clima.T15 - self.clima.Ta)) - (self.chimenea.hrws * (self.clima.T15 - self.clima.Ts))) * ((2 * tiempoActual) / (self.pared.densp * self.pared.cpp * self.pared.x))) + self.clima.T15
-
-        return "ok"
+        temp = [To1, T11, T15_1]
+        return temp
 

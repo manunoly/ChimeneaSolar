@@ -18,6 +18,8 @@ class ParedPropiedades:
     l  = Decimal(2)  ## altura de la pared
     W = Decimal(0.145)
 
+    T1 = 306
+    T15 = 304
     # propiedades pared - aire
     ufpa = Decimal(0) #viscocidad cinematica de la pared-aire
     denspa = Decimal(0) ## densidad

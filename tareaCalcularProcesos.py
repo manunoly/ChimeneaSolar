@@ -47,8 +47,8 @@ class TareaCalcular:
                     a = self.__chimenea.calcular(Decimal(To), Decimal(Tg), Decimal(Tf))
                     vueltas = vueltas + 1
                     if abs(a[0]) < menorValor:
-                        menorValor = a[0]
-                        temperaturas = [vueltas, menorValor, To, Tg , Tf, a[0], a[1], a[2], a[3], a[4]]
+                        menorValor = abs(a[0])
+                        temperaturas = [vueltas, a[0], To, Tg , Tf, a[0], a[1], a[2], a[3], a[4]]
                     Tf = Tf + self.__incremento
                 Tg = Tg + self.__incremento
             # To = To - self.__incremento

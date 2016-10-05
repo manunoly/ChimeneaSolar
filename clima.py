@@ -12,7 +12,7 @@ class ClimaPropiedades:
 
     T1 = Decimal(0)
     T15 = Decimal(0)
-
+    tiempoActual = Decimal(0)
     # Temperatura del cielo
     Ts = Decimal(0.0552) * (Ta ** Decimal(1.5))
 
