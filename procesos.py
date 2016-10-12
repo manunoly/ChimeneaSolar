@@ -9,9 +9,10 @@ from paredPropiedades import ParedPropiedades
 from vidrioPropiedades import VidrioPropiedades
 from chimeneaSolar import ChimeneaSolar
 from decimal import *
+getcontext().prec = 5
 
 class Procesos:
-    getcontext().prec = 10
+
     def __init__(self, clima = None, pared = None, vidrio = None, chimenea = None):
         if clima is None:
             clima = ClimaPropiedades()
@@ -26,7 +27,7 @@ class Procesos:
             chimenea = ChimeneaSolar(clima, pared, vidrio)
         self.chimenea = chimenea
 
-    def matar_procesos(self, pid):
+    def matarProcesos(self, pid):
         parent = psutil.Process(pid)
         children = parent.get_children(recursive=True)
 
@@ -55,7 +56,7 @@ class Procesos:
         if To is None:
             To = rangoSuperiorTg
         if rangoTo is None:
-            rangoTo = Decimal(12)
+            rangoTo = Decimal(15)
         if incremento is None:
             incremento = Decimal(0.1)
         fijoTo = False
@@ -83,37 +84,40 @@ class Procesos:
             Tf = Decimal(datos[4])
             hg = Decimal(datos[9])
             Tg = Decimal(datos[3])
-            mejorFlujoMasico = 0
+            valorRotacion = 0
             flujoMasicoO = 10
-            valorVariar = Decimal(1)
+            valorVariar = Decimal(10)
             flujoMasicoT = 30
-            while valorVariar < 31:
+            while valorVariar < 70:
                 flujoMasico = (hw * (To - Tf)) - (hg * (Tf - Tg)) - (valorVariar * (Tf - Decimal(self.clima.Ta)))
                 if abs(flujoMasico) < flujoMasicoT:
                     flujoMasicoT = abs(flujoMasico)
                     flujoMasicoO = flujoMasico
-                    mejorFlujoMasico = valorVariar
+                    valorRotacion = valorVariar
                 valorVariar = valorVariar + Decimal(0.5)
             if(flujoMasicoO != 10):
-                valores.append([flujoMasicoO, mejorFlujoMasico, datos])
-        valoresM = sorted(valores, key = lambda x: abs(x[0]))
+                valores.append([flujoMasicoO, valorRotacion, datos])
+        # valoresM = sorted(valores, key = lambda x: abs(x[0]))
 
-        if valoresM.__len__() >= 1:
-            mejores = valoresM[0]
-            Tf = Decimal(mejores[2][4])
-            Cf = (Decimal(1.007) + Decimal(0.00004) * (Decimal(Tf) - Decimal(300))) * Decimal(10) ** Decimal(3)
-            print(Cf)
-            flujoMasicoFinal = (Decimal(mejorFlujoMasico) * Decimal(0.75) * Decimal(self.pared.W) * Decimal(self.pared.l)) / Decimal(Cf)
-            mejores.append(flujoMasicoFinal)
-            return mejores
+        if valores.__len__() >= 1:
+            for mejores in valores:
+                mejorFlujoMasico = mejores[1]
+                Tf = Decimal(mejores[2][4])
+                Cf = (Decimal(1.007) + Decimal(0.00004) * (Decimal(Tf) - Decimal(300))) * Decimal(10) ** Decimal(3)
+                flujoMasicoFinal = (Decimal(mejorFlujoMasico) * Decimal(0.75) * Decimal(self.pared.W) * Decimal(self.pared.l)) / Decimal(Cf)
+                mejores.append(flujoMasicoFinal)
+            valoresFM = sorted(valores, key = lambda x: x[x.__len__() -1], reverse=True)
+            return valoresFM
         return None
 
-    def calcularSegundaFase(self, To, Tg, Tf):
+    def calcularSegundaFase(self, To, Tg, Tf, sw, hw, hrwg):
         tiempoActual = 3600
+        hrws = (Decimal(0.0000000567) * self.pared.ep) * (self.clima.T15 + self.clima.Ts) * (self.clima.T15 ** 2 + self.clima.Ts ** 2)
         # de donde sale la variable kp
-        To1 = (self.chimenea.sw -(self.chimenea.hw *(To -Tf) - (self.chimenea.hrwg * (To - Tg)) - ((self.pared.kp / self.pared.x) * (To - self.clima.T1))) * ((2 * 3600) / (self.pared.cpp * self.pared.densp * self.pared.x))) + To
+        To1 = (sw -(hw *(To -Tf) - (hrwg * (To - Tg)) - ((self.pared.kp / self.pared.x) * (To - self.clima.T1))) * ((2 * 3600) / (self.pared.cpp * self.pared.densp * self.pared.x))) + To
         T11 = (((self.pared.diff * tiempoActual) / self.pared.x ** 2 ) * (self.clima.T15 + To - (2 * self.clima.T1))) + self.clima.T1
-        T15_1 = ((((self.pared.k / self.pared.x) * (self.clima.T1 - self.clima.T15)) - (self.clima.hwind * (self.clima.T15 - self.clima.Ta)) - (self.chimenea.hrws * (self.clima.T15 - self.clima.Ts))) * ((2 * tiempoActual) / (self.pared.densp * self.pared.cpp * self.pared.x))) + self.clima.T15
+        T15_1 = ((((self.pared.k / self.pared.x) * (self.clima.T1 - self.clima.T15)) - (self.clima.hwind * (self.clima.T15 - self.clima.Ta)) - (hrws * (self.clima.T15 - self.clima.Ts))) * ((2 * tiempoActual) / (self.pared.densp * self.pared.cpp * self.pared.x))) + self.clima.T15
+
         temp = [To1, T11, T15_1]
         return temp
 

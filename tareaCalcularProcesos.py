@@ -1,5 +1,6 @@
 __author__ = 'manuel'
 from decimal import *
+getcontext().prec = 5
 
 class TareaCalcular:
 
