@@ -10,8 +10,8 @@ class ClimaPropiedades:
     velocidadViento = Decimal(1) #V
     radicacion = Decimal(0) #rad vertical -- ver con geovanna como se calcula la radiacion vertical, se debe ir variando segun las horas del dia.
 
-    T1 = Decimal(0)
-    T15 = Decimal(0)
+    T1 = Decimal(306)
+    T15 = Decimal(307)
     tiempoActual = Decimal(0)
     # Temperatura del cielo
     Ts = Decimal(0.0552) * (Ta ** Decimal(1.5))

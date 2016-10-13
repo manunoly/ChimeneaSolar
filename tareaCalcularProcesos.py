@@ -30,8 +30,6 @@ class TareaCalcular:
 
         if not self.__fijoTo:
             vueltas = 0
-            vueltasTo = 0
-            vueltasTg = 0
             To = self.__cid
             # rangoInferiorTo = To - self.variacionProceso
             total = 0

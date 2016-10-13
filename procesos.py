@@ -9,6 +9,8 @@ from paredPropiedades import ParedPropiedades
 from vidrioPropiedades import VidrioPropiedades
 from chimeneaSolar import ChimeneaSolar
 from decimal import *
+import time, os
+
 getcontext().prec = 5
 
 class Procesos:
@@ -45,26 +47,33 @@ class Procesos:
 
     def iniciarProcesos(self, cola, incremento = None, To = None,  Tg = None, rangoTg = None, rangoTo = None):
         piscina = []
-        if cola is None:
-            cola = Queue
+        primeraVuelta = False
         if Tg is None:
-            Tg = Decimal(self.clima.Ta)
+            Tg = self.clima.Ta
         if rangoTg is None:
             rangoTg = Decimal(2)
         rangoSuperiorTg = Tg + rangoTg
         resultado = []
-        if To is None:
-            To = rangoSuperiorTg
-        if rangoTo is None:
-            rangoTo = Decimal(15)
         if incremento is None:
             incremento = Decimal(0.1)
+        if To is None:
+            To = rangoSuperiorTg
+            primeraVuelta = True
         fijoTo = False
         cant = 0
         variacionProceso = incremento
-        i = To
-        limite = Decimal(To + rangoTo)
-
+        if rangoTo is None and primeraVuelta:
+            rangoTo = Decimal(15)
+            i = To
+            limite = Decimal(To + rangoTo)
+        else:
+            i = Tg + Decimal(2)
+            limite = To + rangoTo
+        print(limite)
+        print(i)
+        print(To)
+        print(Tg)
+        print(self.clima.Ta)
         while (limite >= i):
             piscina.append(Process(target=TareaCalcular(limite, cola, fijoTo, incremento, rangoSuperiorTg, self.clima, self.pared, self.vidrio, variacionProceso, self.chimenea).run))
             # print("proceso " + str(i))
@@ -110,14 +119,38 @@ class Procesos:
             return valoresFM
         return None
 
+    def esperar(self,piscina):
+        timeEnd = 0
+        while piscina:
+            time.sleep(5)
+            self.terminarProcesos(piscina)
+            timeEnd = timeEnd + 5
+            if timeEnd > 350:
+                print("Tiempo límite exedido de 350 segundos, Fuerzo el cierre!!")
+                self.terminarProcesos(piscina)
+                idProceso = os.getpid()
+                self.matarProcesos(idProceso)
+                break
+
+    def getMejores(self, cola):
+        menores = []
+        while not cola.empty():
+            valor = cola.get()
+            if abs(valor[1]) < 1:
+                    menores.append(valor)
+        return menores
+
     def calcularSegundaFase(self, To, Tg, Tf, sw, hw, hrwg):
         tiempoActual = 3600
         hrws = (Decimal(0.0000000567) * self.pared.ep) * (self.clima.T15 + self.clima.Ts) * (self.clima.T15 ** 2 + self.clima.Ts ** 2)
         # de donde sale la variable kp
         To1 = (sw -(hw *(To -Tf) - (hrwg * (To - Tg)) - ((self.pared.kp / self.pared.x) * (To - self.clima.T1))) * ((2 * 3600) / (self.pared.cpp * self.pared.densp * self.pared.x))) + To
         T11 = (((self.pared.diff * tiempoActual) / self.pared.x ** 2 ) * (self.clima.T15 + To - (2 * self.clima.T1))) + self.clima.T1
-        T15_1 = ((((self.pared.k / self.pared.x) * (self.clima.T1 - self.clima.T15)) - (self.clima.hwind * (self.clima.T15 - self.clima.Ta)) - (hrws * (self.clima.T15 - self.clima.Ts))) * ((2 * tiempoActual) / (self.pared.densp * self.pared.cpp * self.pared.x))) + self.clima.T15
-
+        T15_1 = ((((self.pared.kp / self.pared.x) * (self.clima.T1 - self.clima.T15)) - (self.clima.hwind * (self.clima.T15 - self.clima.Ta)) - (hrws * (self.clima.T15 - self.clima.Ts))) * ((2 * tiempoActual) / (self.pared.densp * self.pared.cpp * self.pared.x))) + self.clima.T15
+        self.clima.Ta = Tg
+        self.clima.T15 = T15_1
+        self.clima.T1 = T11
         temp = [To1, T11, T15_1]
+
         return temp
 
