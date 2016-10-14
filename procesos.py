@@ -67,13 +67,11 @@ class Procesos:
             i = To
             limite = Decimal(To + rangoTo)
         else:
+
             i = Tg + Decimal(2)
             limite = To + rangoTo
-        print(limite)
-        print(i)
-        print(To)
-        print(Tg)
-        print(self.clima.Ta)
+            print(Tg)
+            print(limite)
         while (limite >= i):
             piscina.append(Process(target=TareaCalcular(limite, cola, fijoTo, incremento, rangoSuperiorTg, self.clima, self.pared, self.vidrio, variacionProceso, self.chimenea).run))
             # print("proceso " + str(i))
