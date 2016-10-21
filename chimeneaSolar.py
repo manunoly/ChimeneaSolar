@@ -4,7 +4,7 @@ from decimal import *
 
 class ChimeneaSolar:
     ## Constante
-    getcontext().prec = 5
+    getcontext().prec = 10
 
     def __init__(self, clima, pared, vidrio):
         self.__vidrioP = vidrio

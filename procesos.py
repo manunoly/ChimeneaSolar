@@ -8,10 +8,11 @@ from clima import ClimaPropiedades
 from paredPropiedades import ParedPropiedades
 from vidrioPropiedades import VidrioPropiedades
 from chimeneaSolar import ChimeneaSolar
+from tareaCalcularProcesos2 import TareaCalcularSegundaFase
 from decimal import *
 import time, os
 
-getcontext().prec = 5
+getcontext().prec = 10
 
 class Procesos:
 
@@ -28,6 +29,7 @@ class Procesos:
         if chimenea is None:
             chimenea = ChimeneaSolar(clima, pared, vidrio)
         self.chimenea = chimenea
+        self.incremento = Decimal(0.1)
 
     def matarProcesos(self, pid):
         parent = psutil.Process(pid)
@@ -45,7 +47,7 @@ class Procesos:
                 piscina.remove(proceso)
                 del(proceso)
 
-    def iniciarProcesos(self, cola, incremento = None, To = None,  Tg = None, rangoTg = None, rangoTo = None):
+    def iniciarProcesos(self, cola, incremento = None, To = None,  Tg = None, rangoTg = None):
         piscina = []
         primeraVuelta = False
         if Tg is None:
@@ -53,27 +55,21 @@ class Procesos:
         if rangoTg is None:
             rangoTg = Decimal(2)
         rangoSuperiorTg = Tg + rangoTg
+        rangoInferiorTg = Tg - rangoTg
         resultado = []
         if incremento is None:
-            incremento = Decimal(0.1)
+            incremento = self.incremento
         if To is None:
             To = rangoSuperiorTg
             primeraVuelta = True
         fijoTo = False
         cant = 0
         variacionProceso = incremento
-        if rangoTo is None and primeraVuelta:
-            rangoTo = Decimal(15)
-            i = To
-            limite = Decimal(To + rangoTo)
-        else:
+        i = Tg + Decimal(2)
+        limite = i + 15
 
-            i = Tg + Decimal(2)
-            limite = To + rangoTo
-            print(Tg)
-            print(limite)
         while (limite >= i):
-            piscina.append(Process(target=TareaCalcular(limite, cola, fijoTo, incremento, rangoSuperiorTg, self.clima, self.pared, self.vidrio, variacionProceso, self.chimenea).run))
+            piscina.append(Process(target=TareaCalcular(limite, cola, incremento, rangoSuperiorTg, rangoInferiorTg, self.clima, self.pared, self.vidrio, variacionProceso, self.chimenea).primeraVuelta))
             # print("proceso " + str(i))
             piscina[piscina.__len__() - 1].start()
             limite = limite - variacionProceso
@@ -123,8 +119,8 @@ class Procesos:
             time.sleep(5)
             self.terminarProcesos(piscina)
             timeEnd = timeEnd + 5
-            if timeEnd > 350:
-                print("Tiempo límite exedido de 350 segundos, Fuerzo el cierre!!")
+            if timeEnd > 600:
+                print("Tiempo límite exedido de 600 segundos, Fuerzo el cierre!!")
                 self.terminarProcesos(piscina)
                 idProceso = os.getpid()
                 self.matarProcesos(idProceso)
@@ -145,10 +141,22 @@ class Procesos:
         To1 = (sw -(hw *(To -Tf) - (hrwg * (To - Tg)) - ((self.pared.kp / self.pared.x) * (To - self.clima.T1))) * ((2 * 3600) / (self.pared.cpp * self.pared.densp * self.pared.x))) + To
         T11 = (((self.pared.diff * tiempoActual) / self.pared.x ** 2 ) * (self.clima.T15 + To - (2 * self.clima.T1))) + self.clima.T1
         T15_1 = ((((self.pared.kp / self.pared.x) * (self.clima.T1 - self.clima.T15)) - (self.clima.hwind * (self.clima.T15 - self.clima.Ta)) - (hrws * (self.clima.T15 - self.clima.Ts))) * ((2 * tiempoActual) / (self.pared.densp * self.pared.cpp * self.pared.x))) + self.clima.T15
-        self.clima.Ta = Tg
+        self.clima.Ta = self.clima.Ta - 1
         self.clima.T15 = T15_1
         self.clima.T1 = T11
         temp = [To1, T11, T15_1]
-
         return temp
 
+    def iniciarProcesoSegundaFase(self,cola, To):
+        piscina = []
+        i = self.clima.Ta - Decimal(2)
+        limite = self.clima.Ta + Decimal(2)
+        cant = 0
+        while (limite >= i):
+            piscina.append(Process(target=TareaCalcularSegundaFase(To, limite, cola, self.incremento, self.chimenea).calcularSegundaFase))
+            # print("proceso " + str(i))
+            piscina[piscina.__len__() - 1].start()
+            limite = limite - self.incremento
+            cant = cant + 1
+        print("Creados " + str(cant) + " procesos")
+        return piscina

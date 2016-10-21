@@ -1,6 +1,6 @@
 __author__ = 'manuel'
 from decimal import *
-getcontext().prec = 5
+getcontext().prec = 10
 
 class ClimaPropiedades:
 
