@@ -1,11 +1,10 @@
-from pip._vendor.distlib.compat import raw_input
-
 __author__ = 'manuel'
 
+from pip._vendor.distlib.compat import raw_input
+import csv
 from procesos import Procesos
-from decimal import *
+#from decimal import *
 from multiprocessing import Queue
-from tareaCalcularProcesos2 import TareaCalcularSegundaFase
 
 def entero(maximo):
     try:
@@ -28,24 +27,29 @@ def mostrarValoresMenores(menores):
 
 cola = Queue()
 procesos = Procesos()
+climaObj = procesos.getClimaObjeto()
 piscina = procesos.iniciarProcesos(cola)
 procesos.esperar(piscina)
-menores = procesos.getMejores(cola)
+menores = procesos.getMejores(cola,None,20)
+
 if menores.__len__() >= 1:
     print("Se encontraron " + str(menores.__len__()) + " valores de aproximación menores a 1 en la vuelta 0")
-    flujoMasico = procesos.calcularFlujoMasico(menores)
+    flujoMasico = procesos.calcularFlujoMasico(menores, True)
 else:
     print("No existen valores de aproximación menores a 1 en la vuelta 0")
     exit()
 mostrarValoresMenores(flujoMasico)
 seleccion = entero(flujoMasico.__len__())
 print("Vuelta 0  To " + str(flujoMasico[seleccion][2][2]) + " Tg " + str(flujoMasico[seleccion][2][3]) + " Tf " + str(flujoMasico[seleccion][2][4]))
-dia = 24
+salida = ["Vuelta,Ta,To;Tg;Tf;T1;T15;velocidadViento,radicacion,FM;AproximacionFMa0;variacionFM;Aproximacion0"]
+salida.append("0;" + str(climaObj.Ta) + ';' + str(flujoMasico[seleccion][2][2]) + ';' + str(flujoMasico[seleccion][2][3]) + ';' + str(flujoMasico[seleccion][2][4]) + ';'
+              + str(climaObj.T1) + ';' + str(climaObj.T15) + ';' + str(climaObj.velocidadViento) + ';' + str(climaObj.radicacion) + ';'
+              + str(flujoMasico[seleccion][3]) + ';' + str(flujoMasico[seleccion][0]) + ';' + str(flujoMasico[seleccion][1]) + ';' + str(flujoMasico[seleccion][2][1]))
+dia = climaObj.tamb.__len__()
 vuelta = 1
-# rangoTo = Decimal(5)
+#flujoMasicoO, valorRotacion, [vueltas, menorValor, To, Tg , Tf,round(aproximado, 5), hw, sw, hrwg, hg]
 while vuelta < dia:
     nuevasTemp = procesos.calcularSegundaFase(flujoMasico[seleccion][2][2], flujoMasico[seleccion][2][3], flujoMasico[seleccion][2][4], flujoMasico[seleccion][2][6], flujoMasico[seleccion][2][7], flujoMasico[seleccion][2][8], vuelta)
-    print(nuevasTemp)
     piscina = procesos.iniciarProcesoSegundaFase(cola, nuevasTemp[0])
     procesos.esperar(piscina)
     menores = procesos.getMejores(cola)
@@ -55,11 +59,17 @@ while vuelta < dia:
         flujoMasico = procesos.calcularFlujoMasico(menores)
         if flujoMasico is None:
             print("Sin Resultados del Flujo Masico en la vuelta" + str(vuelta))
-            exit()
-        print("Vuelta " + str(vuelta) + " To " + str(flujoMasico[seleccion][2][2]) + " Tg " + str(flujoMasico[seleccion][2][3]) + " Tf " + str(flujoMasico[seleccion][2][4]) + " Ap " + str(flujoMasico[seleccion][2][1]))
+        print("Vuelta " + str(vuelta) + " Ta " + str(climaObj.Ta) + " To " + str(flujoMasico[seleccion][2][2]) + " Tg " + str(flujoMasico[seleccion][2][3]) + " Tf " + str(flujoMasico[seleccion][2][4]) + " Ap " + str(flujoMasico[seleccion][2][1]))
+        salida.append(str(vuelta) + ";" + str(climaObj.Ta) + ';' + str(flujoMasico[seleccion][2][2]) + ';' + str(flujoMasico[seleccion][2][3]) + ';' + str(flujoMasico[seleccion][2][4]) + ';'
+              + str(climaObj.T1) + ';' + str(climaObj.T15) + ';' + str(climaObj.velocidadViento) + ';' + str(climaObj.radicacion) + ';'
+              + str(flujoMasico[seleccion][3]) + ';' + str(flujoMasico[seleccion][0]) + ';' + str(flujoMasico[seleccion][1]) + ';' + str(flujoMasico[seleccion][2][1]))
     else:
-        print("No existen valores de aproximación menores a 1 en la vuelta " + str(vuelta))
-        exit()
+        print("No existen valores de aproximación en la vuelta " + str(vuelta))
+        break
     vuelta = vuelta + 1
 
 
+with open("/home/manuel/Desktop/salidaSimulacion.csv", "w") as text_file:
+    for content in salida:
+        text_file.write(format(content))
+        text_file.write(format("\n"))

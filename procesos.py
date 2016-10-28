@@ -77,9 +77,9 @@ class Procesos:
         print("Creados " + str(cant) + " procesos")
         return piscina
 
-    def calcularFlujoMasico(self,datosM):
+    def calcularFlujoMasico(self,datosM, orderFM = False):
         #vueltas, menorValor, To, Tg , Tf,round(aproximado, 5), hw, sw, hrwg, hg
-        print("Calculando Flujo Masico, probando " + str(datosM.__len__()))
+        # print("Calculando Flujo Masico, probando " + str(datosM.__len__()))
         valores = []
         for datos in datosM:
             hw = Decimal(datos[6])
@@ -109,7 +109,10 @@ class Procesos:
                 Cf = (Decimal(1.007) + Decimal(0.00004) * (Decimal(Tf) - Decimal(300))) * Decimal(10) ** Decimal(3)
                 flujoMasicoFinal = (Decimal(mejorFlujoMasico) * Decimal(0.75) * Decimal(self.pared.W) * Decimal(self.pared.l)) / Decimal(Cf)
                 mejores.append(flujoMasicoFinal)
-            valoresFM = sorted(valores, key = lambda x: x[x.__len__() -1], reverse=True)
+            if (orderFM):
+                valoresFM = sorted(valores, key = lambda x: x[x.__len__() -1], reverse=True)
+            else:
+                valoresFM = valores
             return valoresFM
         return None
 
@@ -126,7 +129,7 @@ class Procesos:
                 self.matarProcesos(idProceso)
                 break
 
-    def getMejores(self, cola, comparar = None):
+    def getMejores(self, cola, comparar = None, cantidad = 5):
         if comparar is None:
             comparar = 1
         menores = []
@@ -135,11 +138,12 @@ class Procesos:
             # if abs(valor[1]) < comparar:
             menores.append(valor)
         menores = sorted(menores, key = lambda x: abs(x[1]))
-        return menores[:20]
+        return menores[:cantidad]
 
-    def calcularSegundaFase(self, To, Tg, Tf, sw, hw, hrwg, vuelta):
-        print(vuelta)
-        self.clima.actualizarDatosHora(vuelta)
+    def getClimaObjeto(self):
+            return self.clima
+
+    def calcularSegundaFase(self, To, Tg, Tf, hw, sw, hrwg, vuelta):
         tiempoActual = 3600
         hrws = (Decimal(0.0000000567) * self.pared.ep) * (self.clima.T15 + self.clima.Ts) * (self.clima.T15 ** 2 + self.clima.Ts ** 2)
         # de donde sale la variable kp
@@ -147,18 +151,17 @@ class Procesos:
         T11 = (((self.pared.diff * tiempoActual) / self.pared.x ** 2 ) * (self.clima.T15 + To - (2 * self.clima.T1))) + self.clima.T1
         T15_1 = ((((self.pared.kp / self.pared.x) * (self.clima.T1 - self.clima.T15)) - (self.clima.hwind * (self.clima.T15 - self.clima.Ta)) - (hrws * (self.clima.T15 - self.clima.Ts))) * ((2 * tiempoActual) / (self.pared.densp * self.pared.cpp * self.pared.x))) + self.clima.T15
         # self.clima.Ta = self.clima.Ta - 1
+        self.clima.actualizarDatosHora(vuelta)
         self.clima.T15 = T15_1
         self.clima.T1 = T11
         temp = [To1, T11, T15_1]
         return temp
-    TA = [12,12,12,123,123,123]
-    radi = []
 
     def iniciarProcesoSegundaFase(self,cola, To):
         piscina = []
         # i = self.clima.Ta - Decimal(2)
-        i = self.clima.Ta - Decimal(7)
-        limite = self.clima.Ta + Decimal(7)
+        i = self.clima.Ta - Decimal(10)
+        limite = self.clima.Ta + Decimal(10)
         cant = 0
         while (limite >= i):
             piscina.append(Process(target=TareaCalcularSegundaFase(To, limite, cola, self.incremento, self.chimenea).calcularSegundaFase))
