@@ -88,18 +88,18 @@ class Procesos:
             hg = Decimal(datos[9])
             Tg = Decimal(datos[3])
             valorRotacion = 0
-            flujoMasicoO = 10
+            flujoMasicoAproximacion = 1000
             valorVariar = Decimal(10)
-            flujoMasicoT = 100
-            while valorVariar < 70:
+            flujoMasicoT = 1000
+            while valorVariar < 100:
                 flujoMasico = (hw * (To - Tf)) - (hg * (Tf - Tg)) - (valorVariar * (Tf - Decimal(self.clima.Ta)))
                 if abs(flujoMasico) < flujoMasicoT:
                     flujoMasicoT = abs(flujoMasico)
-                    flujoMasicoO = flujoMasico
+                    flujoMasicoAproximacion = flujoMasico
                     valorRotacion = valorVariar
-                valorVariar = valorVariar + Decimal(0.5)
-            if(flujoMasicoO != 10):
-                valores.append([flujoMasicoO, valorRotacion, datos])
+                valorVariar = valorVariar + Decimal(1)
+
+            valores.append([flujoMasicoAproximacion, valorRotacion, datos])
         # valoresM = sorted(valores, key = lambda x: abs(x[0]))
 
         if valores.__len__() >= 1:
@@ -110,7 +110,7 @@ class Procesos:
                 flujoMasicoFinal = (Decimal(mejorFlujoMasico) * Decimal(0.75) * Decimal(self.pared.W) * Decimal(self.pared.l)) / Decimal(Cf)
                 mejores.append(flujoMasicoFinal)
             if (orderFM):
-                valoresFM = sorted(valores, key = lambda x: x[x.__len__() -1], reverse=True)
+                valoresFM = sorted(valores, key = lambda x: x[2][4], reverse=True)
             else:
                 valoresFM = valores
             return valoresFM
@@ -129,7 +129,7 @@ class Procesos:
                 self.matarProcesos(idProceso)
                 break
 
-    def getMejores(self, cola, comparar = None, cantidad = 5):
+    def getMejores(self, cola, comparar = None, cantidad = 10):
         if comparar is None:
             comparar = 1
         menores = []
@@ -139,6 +139,30 @@ class Procesos:
             menores.append(valor)
         menores = sorted(menores, key = lambda x: abs(x[1]))
         return menores[:cantidad]
+
+    def getOptimos(self, valores = None, vuelta = 0):
+        #flujoMasicoApromado0, valorRotacion, [vueltas, menorValor, To, Tg , Tf,round(aproximado, 5), hw, sw, hrwg, hg], FM
+        valoresC = []
+        if vuelta > 0:
+            if self.clima.rad[vuelta] >= self.clima.rad[vuelta - 1]:
+                #debe subir Tf
+                for valor in valores:
+                    valor.append(0)
+                    if valor[2][4] > self.clima.Ta:
+                        valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                    if valor[2][5] < 1:
+                        valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                    if valor[1] < 1:
+                        valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                    elif valor[1] < 10:
+                        valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 0.5
+                    elif valor[1] < 10:
+                        valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 0.5
+                    elif valor[1] < 10:
+                        valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 0.5
+            else:
+                print("debe bajar Tg")
+        print("OK")
 
     def getClimaObjeto(self):
             return self.clima

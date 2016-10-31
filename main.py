@@ -16,13 +16,15 @@ def entero(maximo):
         print ("Por favor seleccione un valor válido")
         entero(maximo)
 
-def mostrarValoresMenores(menores):
+def mostrarValoresMenores(menores, climaObj = None):
     print("#  -  Valor FlujoMasico - To")
     i = 0
     #flujoMasicoO, valorRotacion, [vueltas, menorValor, To, Tg , Tf,round(aproximado, 5), hw, sw, hrwg, hg]
     for menor in menores:
         print("Seleccione este valor tecleando " + str(i))
-        print("FM - " + str(menor[3]) + " ApFM a 0 - " + str(menor[0]) + " ValorVariacionFM - " + str(menor[1]) + " To - " + str(menor[2][2]) + " Tg - " + str(menor[2][3]) + " Tf - " + str(menor[2][4]) + " Aprox a 0 - " + str(menor[2][1]))
+        print("FM - " + str(menor[3]) + "FM aprox a 0 " + str(menor[0]) + " ApFM a 0 - " + str(menor[0]) + " ValorVariacionFM - " + str(menor[1]) + " To - " + str(menor[2][2]) + " Tg - " + str(menor[2][3]) + " Tf - " + str(menor[2][4]) + " Aprox a 0 - " + str(menor[2][1]))
+        if climaObj is not None:
+            print(climaObj.Ta)
         i = i +1
 
 cola = Queue()
@@ -38,7 +40,10 @@ if menores.__len__() >= 1:
 else:
     print("No existen valores de aproximación menores a 1 en la vuelta 0")
     exit()
-mostrarValoresMenores(flujoMasico)
+print(flujoMasico[0])
+exit()
+flujoMasico = procesos.getOptimos(flujoMasico)
+mostrarValoresMenores(flujoMasico, climaObj)
 seleccion = entero(flujoMasico.__len__())
 print("Vuelta 0  To " + str(flujoMasico[seleccion][2][2]) + " Tg " + str(flujoMasico[seleccion][2][3]) + " Tf " + str(flujoMasico[seleccion][2][4]))
 salida = ["Vuelta,Ta,To;Tg;Tf;T1;T15;velocidadViento,radicacion,FM;AproximacionFMa0;variacionFM;Aproximacion0"]
@@ -47,7 +52,7 @@ salida.append("0;" + str(climaObj.Ta) + ';' + str(flujoMasico[seleccion][2][2]) 
               + str(flujoMasico[seleccion][3]) + ';' + str(flujoMasico[seleccion][0]) + ';' + str(flujoMasico[seleccion][1]) + ';' + str(flujoMasico[seleccion][2][1]))
 dia = climaObj.tamb.__len__()
 vuelta = 1
-#flujoMasicoO, valorRotacion, [vueltas, menorValor, To, Tg , Tf,round(aproximado, 5), hw, sw, hrwg, hg]
+
 while vuelta < dia:
     nuevasTemp = procesos.calcularSegundaFase(flujoMasico[seleccion][2][2], flujoMasico[seleccion][2][3], flujoMasico[seleccion][2][4], flujoMasico[seleccion][2][6], flujoMasico[seleccion][2][7], flujoMasico[seleccion][2][8], vuelta)
     piscina = procesos.iniciarProcesoSegundaFase(cola, nuevasTemp[0])
@@ -56,6 +61,8 @@ while vuelta < dia:
 
     if menores.__len__() >= 1:
         seleccion = 0
+        # mostrarValoresMenores(flujoMasico, climaObj)
+        # seleccion = entero(flujoMasico.__len__())
         flujoMasico = procesos.calcularFlujoMasico(menores)
         if flujoMasico is None:
             print("Sin Resultados del Flujo Masico en la vuelta" + str(vuelta))
