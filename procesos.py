@@ -100,20 +100,16 @@ class Procesos:
                 valorVariar = valorVariar + Decimal(1)
 
             valores.append([flujoMasicoAproximacion, valorRotacion, datos])
-        # valoresM = sorted(valores, key = lambda x: abs(x[0]))
+        valoresM = sorted(valores, key = lambda x: abs(x[0]))
 
-        if valores.__len__() >= 1:
+        if valoresM.__len__() >= 1:
             for mejores in valores:
                 mejorFlujoMasico = mejores[1]
                 Tf = Decimal(mejores[2][4])
                 Cf = (Decimal(1.007) + Decimal(0.00004) * (Decimal(Tf) - Decimal(300))) * Decimal(10) ** Decimal(3)
                 flujoMasicoFinal = (Decimal(mejorFlujoMasico) * Decimal(0.75) * Decimal(self.pared.W) * Decimal(self.pared.l)) / Decimal(Cf)
                 mejores.append(flujoMasicoFinal)
-            if (orderFM):
-                valoresFM = sorted(valores, key = lambda x: x[2][4], reverse=True)
-            else:
-                valoresFM = valores
-            return valoresFM
+            return valoresM
         return None
 
     def esperar(self,piscina):
@@ -140,29 +136,53 @@ class Procesos:
         menores = sorted(menores, key = lambda x: abs(x[1]))
         return menores[:cantidad]
 
-    def getOptimos(self, valores = None, vuelta = 0):
+    def getOptimos(self, valores = None, vuelta = 0, resultados = []):
         #flujoMasicoApromado0, valorRotacion, [vueltas, menorValor, To, Tg , Tf,round(aproximado, 5), hw, sw, hrwg, hg], FM
         valoresC = []
         if vuelta > 0:
-            if self.clima.rad[vuelta] >= self.clima.rad[vuelta - 1]:
                 #debe subir Tf
-                for valor in valores:
-                    valor.append(0)
+            for valor in valores:
+                valor.append(0)
+                if self.clima.rad[vuelta] >= self.clima.rad[vuelta - 1]:
                     if valor[2][4] > self.clima.Ta:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-                    if valor[2][5] < 1:
+                if self.clima.rad[vuelta] < self.clima.rad[vuelta - 1] and self.clima.tamb[vuelta] < self.clima.tamb[vuelta -1]:
+                    # condicion para Tg
+                    if Decimal(resultados[vuelta][3]) > valor[2][3]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-                    if valor[1] < 1:
+                    if Decimal(resultados[vuelta][4]) > valor[2][4]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-                    elif valor[1] < 10:
-                        valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 0.5
-                    elif valor[1] < 10:
-                        valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 0.5
-                    elif valor[1] < 10:
-                        valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 0.5
-            else:
-                print("debe bajar Tg")
-        print("OK")
+                # To
+                if valor[2][2] >  self.clima.Ta - 3 and valor[2][2] <  self.clima.Ta + 15:
+                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                #Tg
+                if valor[2][3] >  self.clima.Ta - 2 and valor[2][3] <  self.clima.Ta + 2:
+                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                #Tf
+                if valor[2][4] >  self.clima.Ta - 2 and valor[2][4] <  self.clima.Ta + 5:
+                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                #aproximacion a 0 de las temperaturas
+                if valor[2][5] < 1:
+                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                # puntos para el valor de aproximacion a 0 del FM
+                if valor[0] < 2:
+                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 3
+                elif valor[0] < 10:
+                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                elif valor[0] < 30:
+                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 0.5
+                # puntos para el valor de variacion de FM
+                if valor[1] > 40:
+                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 2
+                elif valor[1] > 10:
+                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                # puntos para el Tf segun su variacion respecto a la Ta
+                diferenciaT = abs( Decimal(self.clima.tamb[vuelta]) - Decimal(valor[2][3]))
+                if diferenciaT <= 2:
+                   valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+
+
+            return sorted(valores, key = lambda x: x[x.__len__() - 1], reverse=True)
 
     def getClimaObjeto(self):
             return self.clima
