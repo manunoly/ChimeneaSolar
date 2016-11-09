@@ -1,6 +1,7 @@
 __author__ = 'manuel'
 from decimal import *
 getcontext().prec = 10
+import sys
 
 class TareaCalcularSegundaFase:
 
@@ -32,3 +33,5 @@ class TareaCalcularSegundaFase:
 
         if menorValor < 100.0:
             self.__cola.put(temperaturas)
+        # def __del__(self):
+        #     print("HIJO {0} - Muere".format(self.__Tg))

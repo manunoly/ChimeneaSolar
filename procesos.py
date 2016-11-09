@@ -29,7 +29,7 @@ class Procesos:
         if chimenea is None:
             chimenea = ChimeneaSolar(clima, pared, vidrio)
         self.chimenea = chimenea
-        self.incremento = Decimal(0.1)
+        self.incremento = Decimal(0.05)
 
     def matarProcesos(self, pid):
         parent = psutil.Process(pid)
@@ -66,14 +66,24 @@ class Procesos:
         cant = 0
         variacionProceso = incremento
         i = Tg + Decimal(2)
-        limite = i + 15
-
+        limite = i + 12
         while (limite >= i):
+            # if (limite > divideProcesos):
+            #     rangoInferiorTgTmp = rangoInferiorTg
+            #     rangoSuperiorTgTmp = limite
+            #     print("divideProcesos " + str(limite))
+            #     while rangoInferiorTgTmp <= rangoSuperiorTgTmp:
+            #         piscina.append(Process(target=TareaCalcularSegundaFase(limite, rangoInferiorTgTmp, cola, incremento, self.chimenea).calcularSegundaFase))
+            #         piscina[piscina.__len__() - 1].start()
+            #         rangoInferiorTgTmp = rangoInferiorTgTmp + incremento
+            #         cant = cant + 1
+            # else:
+            #     print("NO__divideProcesos " + str(limite))
             piscina.append(Process(target=TareaCalcular(limite, cola, incremento, rangoSuperiorTg, rangoInferiorTg, self.clima, self.pared, self.vidrio, variacionProceso, self.chimenea).primeraVuelta))
-            # print("proceso " + str(i))
             piscina[piscina.__len__() - 1].start()
-            limite = limite - variacionProceso
             cant = cant + 1
+            limite = limite - variacionProceso
+
         print("Creados " + str(cant) + " procesos")
         return piscina
 
@@ -115,10 +125,10 @@ class Procesos:
     def esperar(self,piscina):
         timeEnd = 0
         while piscina:
-            time.sleep(5)
+            time.sleep(10)
             self.terminarProcesos(piscina)
-            timeEnd = timeEnd + 5
-            if timeEnd > 600:
+            timeEnd = timeEnd + 10
+            if timeEnd > 1900:
                 print("Tiempo límite exedido de 600 segundos, Fuerzo el cierre!!")
                 self.terminarProcesos(piscina)
                 idProceso = os.getpid()
@@ -138,49 +148,67 @@ class Procesos:
 
     def getOptimos(self, valores = None, vuelta = 0, resultados = []):
         #flujoMasicoApromado0, valorRotacion, [vueltas, menorValor, To, Tg , Tf,round(aproximado, 5), hw, sw, hrwg, hg], FM
-        valoresC = []
+        # resultados = "Vuelta,Ta,To;Tg;Tf;T1;T15;velocidadViento,radicacion,FM;AproximacionFMa0;variacionFM;Aproximacion0"
         if vuelta > 0:
                 #debe subir Tf
             for valor in valores:
                 valor.append(0)
-                if self.clima.rad[vuelta] >= self.clima.rad[vuelta - 1]:
-                    if valor[2][4] > self.clima.Ta:
+                # if self.clima.rad[vuelta] >= self.clima.rad[vuelta - 1]:
+                # #si T0 es mayor a Ta
+                # if valor[2][2] > self.clima.Ta:
+                #     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                #si Tg es mayor a Ta
+                if valor[2][3] > self.clima.Ta:
+                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                #si Tf es mayor a Ta
+                if valor[2][4] > self.clima.Ta:
+                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                # condicion si hay radiacion deberia subir Tg y Tf
+                if self.clima.rad[vuelta]> 0:
+                    if Decimal(resultados[vuelta][3]) < valor[2][3]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-                if self.clima.rad[vuelta] < self.clima.rad[vuelta - 1] and self.clima.tamb[vuelta] < self.clima.tamb[vuelta -1]:
-                    # condicion para Tg
-                    if Decimal(resultados[vuelta][3]) > valor[2][3]:
+                    if Decimal(resultados[vuelta][4]) < valor[2][4]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-                    if Decimal(resultados[vuelta][4]) > valor[2][4]:
-                        valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                #
+                # # condicion para Tg y Tf si baja la temperatura
+                # if self.clima.tamb[vuelta] < self.clima.tamb[vuelta -1]:
+                #     if Decimal(resultados[vuelta][3]) > valor[2][3]:
+                #         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                #     if Decimal(resultados[vuelta][4]) > valor[2][4]:
+                #         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                #
+                # # condicion para Tg y Tf si sube la temperatura
+                # if self.clima.tamb[vuelta] > self.clima.tamb[vuelta -1]:
+                #     if Decimal(resultados[vuelta][3]) < valor[2][3]:
+                #         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                #     if Decimal(resultados[vuelta][4]) < valor[2][4]:
+                #         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+
                 # To
                 if valor[2][2] >  self.clima.Ta - 3 and valor[2][2] <  self.clima.Ta + 15:
                     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
                 #Tg
-                if valor[2][3] >  self.clima.Ta - 2 and valor[2][3] <  self.clima.Ta + 2:
-                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                if valor[2][3] >  self.clima.Ta - 1 and valor[2][3] <  self.clima.Ta + 3:
+                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 2
                 #Tf
-                if valor[2][4] >  self.clima.Ta - 2 and valor[2][4] <  self.clima.Ta + 5:
+                if valor[2][4] >  self.clima.Ta - 1 and valor[2][4] <  self.clima.Ta + 5:
+                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 2
+                TfDif = abs(valor[2][4] - resultados[vuelta][4])
+                if TfDif < 2:
                     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
                 #aproximacion a 0 de las temperaturas
-                if valor[2][5] < 1:
+                if abs(valor[2][5]) < 2:
                     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
                 # puntos para el valor de aproximacion a 0 del FM
-                if valor[0] < 2:
-                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 3
-                elif valor[0] < 10:
+                if valor[0] < 6:
                     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-                elif valor[0] < 30:
+                elif valor[0] < 20:
                     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 0.5
                 # puntos para el valor de variacion de FM
                 if valor[1] > 40:
-                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 2
-                elif valor[1] > 10:
                     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-                # puntos para el Tf segun su variacion respecto a la Ta
-                diferenciaT = abs( Decimal(self.clima.tamb[vuelta]) - Decimal(valor[2][3]))
-                if diferenciaT <= 2:
-                   valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-
+                elif valor[1] > 10:
+                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 0.5
 
             return sorted(valores, key = lambda x: x[x.__len__() - 1], reverse=True)
 
