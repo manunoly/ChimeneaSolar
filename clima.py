@@ -9,6 +9,7 @@ class ClimaPropiedades:
     velV = []
     rad = []
     tamb = []
+    humedadRelativa = 0
     Ta = Decimal(295) #Temp Ambiental
     velocidadViento = Decimal(1) #V
     radicacion = Decimal(0) #rad vertical -- ver con geovanna como se calcula la radiacion vertical, se debe ir variando segun las horas del dia.
@@ -24,7 +25,7 @@ class ClimaPropiedades:
     # la velocidad del viento va variando a cada hora segun condiciones climaticas
     hwind = Decimal(5.7) + (Decimal(3.8) * velocidadViento)
 
-    def __init__(self, fichero = '/home/manuel/PycharmProjects/chimeneaSolar/epw.epw', posTamb = 6, posRad = 13, posVelV = 21, posRH = 8, inicio = 8, fin = 31, lineasUtilizar= None, delimitador=','):
+    def __init__(self, fichero = '/home/manuel/PycharmProjects/chimeneaSolar/epw.epw', posTamb = 6, posRad = 13, posVelV = 21, posRH = 8, inicio = 32, fin = 56, lineasUtilizar= None, delimitador=','):
         try:
             data = open(fichero,'r')
             texto = enumerate(data)
@@ -32,14 +33,16 @@ class ClimaPropiedades:
                 if i >= inicio:
                     datosP = linea.split(delimitador)
                     self.tamb.append(Decimal(datosP[posTamb]) + 273)
-                    self.velV.append(datosP[posVelV])
-                    self.rad.append(datosP[posRad])
-                    self.rh.append(datosP[posRH])
+                    self.velV.append(Decimal(datosP[posVelV]))
+                    self.rad.append(Decimal(datosP[posRad]))
+                    self.rh.append(Decimal(datosP[posRH]))
                 if i > fin:
                     break
             self.actualizarDatosHora()
         except Exception:
             pass
+        print(self.tamb[0])
+        print(self.tamb[1])
 
     def __getattr__(self, item):
         return object.__getattribute__(self, item)
@@ -51,6 +54,7 @@ class ClimaPropiedades:
         if hora is None:
             hora = 0
         self.Ta = Decimal(self.tamb[hora])
+        self.humedadRelativa = Decimal(self.rh[hora])
         self.radicacion = Decimal(self.rad[hora])
         self.velocidadViento = Decimal(self.velV[hora])
         self.Ts = Decimal(0.0552) * (self.Ta ** Decimal(1.5))
