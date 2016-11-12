@@ -89,7 +89,7 @@ class ChimeneaSolar:
         # variar Tf comenzar con Tg y terminar con To pq siempre tiene q estar en este rango.
 
         aproximado = Decimal(sg + (hg * (Tf - Tg)) + (hrwg * (To - Tg)) - (self.__climaP.hwind * (Tg - self.__climaP.Ta)) - (hrgs * (Tg - self.__climaP.Ts)))
-        data = [round(aproximado, 5), hw, sw, hrwg, hg]
+        data = [round(aproximado, 5), hw, sw, hrwg, denspa]
         return data
         # return aproximado
     #

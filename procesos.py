@@ -10,7 +10,7 @@ from vidrioPropiedades import VidrioPropiedades
 from chimeneaSolar import ChimeneaSolar
 from tareaCalcularProcesos2 import TareaCalcularSegundaFase
 from decimal import *
-import time, os
+import time, os, math
 
 getcontext().prec = 10
 
@@ -92,6 +92,20 @@ class Procesos:
         # print("Calculando Flujo Masico, probando " + str(datosM.__len__()))
         valores = []
         for datos in datosM:
+            denspa = Decimal(datos[9])
+            Tf = Decimal(datos[4])
+            restaTemp = Decimal(Tf - self.clima.Ta)
+            if restaTemp > 0:
+                flujoMasicoFinal = self.clima.cd * ((denspa * self.pared.Ao) / Decimal(math.sqrt(1 + self.pared.Ao/self.pared.Ai)) * Decimal(math.sqrt((2 * self.clima.gravedad * self.pared.l * restaTemp) / self.clima.Ta)))
+            else:
+                flujoMasicoFinal = 0
+            valores.append([0, 0, datos,flujoMasicoFinal])
+        # return valores
+        return sorted(valores, key = lambda x: x[x.__len__() - 1], reverse=True)
+
+        #antigua formula de flujo masico no a utilizar
+        valores = []
+        for datos in datosM:
             hw = Decimal(datos[6])
             To = Decimal(datos[2])
             Tf = Decimal(datos[4])
@@ -118,7 +132,7 @@ class Procesos:
                 Tf = Decimal(mejores[2][4])
                 Cf = (Decimal(1.007) + Decimal(0.00004) * (Decimal(Tf) - Decimal(300))) * Decimal(10) ** Decimal(3)
                 flujoMasicoFinal = (Decimal(mejorFlujoMasico) * Decimal(0.75) * Decimal(self.pared.W) * Decimal(self.pared.l)) / Decimal(Cf)
-                mejores.append(flujoMasicoFinal)
+                mejores.append(Decimal(flujoMasicoFinal))
             return valoresM
         return None
 
@@ -150,10 +164,12 @@ class Procesos:
         #flujoMasicoApromado0, valorRotacion, [vueltas, menorValor, To, Tg , Tf,round(aproximado, 5), hw, sw, hrwg, hg], FM
         # resultados = "Vuelta,Ta,To;Tg;Tf;T1;T15;velocidadViento,radicacion,FM;AproximacionFMa0;variacionFM;Aproximacion0"
         if vuelta > 0:
-            print(resultados[vuelta][2])
+            print(self.clima.Ta)
+            print(self.clima.tamb[vuelta])
+            print(resultados[vuelta])
             for valor in valores:
                 valor.append(0)
-                # if self.clima.rad[vuelta] >= self.clima.rad[vuelta - 1]:
+                # if self.clima.rad[vuelta - 1] >= self.clima.rad[vuelta - 1]:
                 # #si T0 es mayor a Ta
                 # if valor[2][2] > self.clima.Ta:
                 #     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
@@ -165,83 +181,84 @@ class Procesos:
                     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
                 # condicion si hay radiacion deberia subir Tg y Tf
                 if self.clima.radicacion > 0:
-                    if Decimal(resultados[vuelta][3]) < valor[2][3]:
+                    if resultados[vuelta][3] < valor[2][3]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-                    if Decimal(resultados[vuelta][4]) < valor[2][4]:
+                    if resultados[vuelta][4] < valor[2][4]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
                 #
                 # condicion para Tg y Tf si baja la temperatura y la radiacion
-                if self.clima.tamb[vuelta] > self.clima.Ta and self.clima.rad[vuelta] > self.clima.radicacion:
-                    if Decimal(resultados[vuelta][3]) > valor[2][3]:
+                if self.clima.tamb[vuelta - 1] > self.clima.Ta and self.clima.rad[vuelta - 1] > self.clima.radicacion:
+                    if resultados[vuelta][3] > valor[2][3]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 2
-                    if Decimal(resultados[vuelta][4]) > valor[2][4]:
+                    if resultados[vuelta][4] > valor[2][4]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 2
                 # condicion para Tg y Tf si sube la temperatura y la radiacion
-                elif self.clima.tamb[vuelta] < self.clima.Ta and self.clima.rad[vuelta] < self.clima.radicacion:
-                    if Decimal(resultados[vuelta][3]) < valor[2][3]:
+                elif self.clima.tamb[vuelta - 1] < self.clima.Ta and self.clima.rad[vuelta - 1] < self.clima.radicacion:
+                    if resultados[vuelta][3] < valor[2][3]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 2
-                    if Decimal(resultados[vuelta][4]) < valor[2][4]:
+                    if resultados[vuelta][4] < valor[2][4]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 2
 
                 # condicion para Tg y Tf si baja la temperatura
-                if self.clima.tamb[vuelta] > self.clima.Ta:
-                    if Decimal(resultados[vuelta][3]) > valor[2][3]:
+                if self.clima.tamb[vuelta - 1] > self.clima.Ta:
+                    if resultados[vuelta][3] > valor[2][3]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-                    if Decimal(resultados[vuelta][4]) > valor[2][4]:
+                    if resultados[vuelta][4] > valor[2][4]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
                 # condicion para Tg y Tf si baja la temperatura
-                elif self.clima.tamb[vuelta] < self.clima.Ta:
-                    if Decimal(resultados[vuelta][3]) < valor[2][3]:
+                elif self.clima.tamb[vuelta - 1] < self.clima.Ta:
+                    if resultados[vuelta][3] < valor[2][3]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-                    if Decimal(resultados[vuelta][4]) < valor[2][4]:
+                    if resultados[vuelta][4] < valor[2][4]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
 
                 # condicion para Tg y Tf si baja la radiacion
-                if self.clima.rad[vuelta] > self.clima.radicacion:
-                    if Decimal(resultados[vuelta][3]) > valor[2][3]:
+                if self.clima.rad[vuelta - 1] > self.clima.radicacion:
+                    if resultados[vuelta][3] > valor[2][3]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-                    if Decimal(resultados[vuelta][4]) > valor[2][4]:
+                    if resultados[vuelta][4] > valor[2][4]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
                 # condicion para Tg y Tf si sube la temperatura y la radiacion
-                elif self.clima.rad[vuelta] < self.clima.radicacion:
-                    if Decimal(resultados[vuelta][3]) < valor[2][3]:
+                elif self.clima.rad[vuelta - 1] < self.clima.radicacion:
+                    if resultados[vuelta][3] < valor[2][3]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-                    if Decimal(resultados[vuelta][4]) < valor[2][4]:
+                    if resultados[vuelta][4] < valor[2][4]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
 
-                # To
-                if valor[2][2] >  self.clima.Ta - 3 or valor[2][2] <  self.clima.Ta + 15:
-                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                # # To
+                # if valor[2][2] >  self.clima.Ta - 3 or valor[2][2] <  self.clima.Ta + 15:
+                #     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
                 #Tg
                 if valor[2][3] >  self.clima.Ta - 1 or valor[2][3] <  self.clima.Ta + 3:
                     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
                 #Tf
                 if valor[2][4] >  self.clima.Ta - 1 or valor[2][4] <  self.clima.Ta + 5:
                     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-                TfDif = abs(valor[2][4] - Decimal(resultados[vuelta][4]))
+                TfDif = abs(valor[2][4] - resultados[vuelta][4])
                 if TfDif < 2:
                     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
                 #aproximacion a 0 de las temperaturas
                 if abs(valor[2][5]) < 2:
                     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
                 # puntos para el valor de aproximacion a 0 del FM
-                if valor[0] < 2:
-                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 2
-                elif valor[0] < 6:
-                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-                elif valor[0] < 20:
-                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 0.5
+                # if valor[0] < 2:
+                #     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                # elif valor[0] < 6:
+                #     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 0.5
+                # elif valor[0] < 20:
+                #     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 0.1
                 # puntos para el valor de variacion de FM
-                if valor[1] > 40:
-                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 2
-                elif valor[1] > 10:
-                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+                # if valor[1] > 40:
+                #     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 2
+                # el
+                if valor[1] > 10:
+                    valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 0.5
 
                 #si aumenta o disminuye la velocidad del viento seria logico variara el Tf
                 if(self.clima.velocidadViento > self.clima.velV[vuelta]):
-                    if valor[2][4] < Decimal(resultados[vuelta][4]):
+                    if valor[2][4] < resultados[vuelta][4]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
-                elif valor[2][4] > Decimal(resultados[vuelta][4]):
+                elif valor[2][4] > resultados[vuelta][4]:
                         valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
 
             return sorted(valores, key = lambda x: x[x.__len__() - 1], reverse=True)
