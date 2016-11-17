@@ -1,9 +1,9 @@
 __author__ = 'manuel'
 from decimal import *
-getcontext().prec = 10
+
 
 class ParedPropiedades:
-
+    getcontext().prec = 10
     ## variables de la pared
     kp = Decimal(1.63)  # conductividad termica
     cpp = Decimal(1090)    # calor especifico pared especifico
@@ -20,6 +20,8 @@ class ParedPropiedades:
     # area de outlet inlet
     Ao = Decimal(0.025)
     Ai = Decimal(0.025)
+    Si = Decimal(0.75)
+    Ad = Decimal(1.5) # Ancho del ducto
 
     # propiedades pared - aire
     ufpa = Decimal(0) #viscocidad cinematica de la pared-aire

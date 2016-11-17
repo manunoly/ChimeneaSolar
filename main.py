@@ -1,11 +1,13 @@
 __author__ = 'manuel'
 
 from pip._vendor.distlib.compat import raw_input
-import csv
 from procesos import Procesos
-#from decimal import *
+from decimal import *
 from multiprocessing import Queue
 import datetime
+getcontext().prec = 10
+import matplotlib.pyplot as plt
+
 
 def entero(maximo):
     try:
@@ -17,7 +19,7 @@ def entero(maximo):
         print ("Por favor seleccione un valor válido")
         entero(maximo)
 
-def mostrarValoresMenores(menores, climaObj = None):
+def mostrarValoresMenores(menores, climaObj = None, limite = 100):
     print("#  -  Valor FlujoMasico - To")
     i = 0
     #flujoMasicoO, valorRotacion, [vueltas, menorValor, To, Tg , Tf,round(aproximado, 5), hw, sw, hrwg, hg]
@@ -26,11 +28,20 @@ def mostrarValoresMenores(menores, climaObj = None):
         print(str(menor[menor.__len__() - 1]) + " FM - " + str(menor[3]) + " To - " + str(menor[2][2]) + " Tg - " + str(menor[2][3]) + " Tf - " + str(menor[2][4]) + " Aprox a 0 - " + str(menor[2][1]))
         if climaObj is not None:
             print(climaObj.Ta)
+        if i > limite:
+            break
         i = i +1
 # try:
 cola = Queue()
 procesos = Procesos()
 climaObj = procesos.getClimaObjeto()
+
+# plt.plot(climaObj.tamb)
+# plt.ylabel('Temperaturas')
+# plt.yscale('linear')
+# plt.show()
+# exit()
+
 piscina = procesos.iniciarProcesos(cola)
 procesos.esperar(piscina)
 menores = procesos.getMejores(cola,None,20)
@@ -48,9 +59,11 @@ seleccion = 0
 print("Vuelta 0  To " + str(flujoMasico[seleccion][2][2]) + " Tg " + str(flujoMasico[seleccion][2][3]) + " Tf " + str(flujoMasico[seleccion][2][4]))
 salida = []
 salida.append([])
-salida[0] = ["Vuelta;Ta;To;Tg;Tf;T1;T15;velocidadViento;radicacion;FM;AproximacionFMa0;variacionFM;Aproximacion0;VelocidadV"]
+salida[0] = ["Vuelta;Ta;To;Tg;Tf;T1;T15;velocidadViento;radicacion;FM;AproximacionFMa0;variacionFM;Aproximacion0;VelocidadV;Tf-o;velTf"]
 salida.append([])
-salida[1] = [0, climaObj.Ta, flujoMasico[seleccion][2][2], flujoMasico[seleccion][2][3], flujoMasico[seleccion][2][4], climaObj.T1, climaObj.T15, climaObj.velocidadViento, climaObj.radicacion, flujoMasico[seleccion][3], flujoMasico[seleccion][0], flujoMasico[seleccion][1], flujoMasico[seleccion][2][1], climaObj.velocidadViento]
+Tfo = procesos.calcularTempFluidoSalida(flujoMasico[seleccion][2][3])
+velocidadVientoFluido = procesos.calcularVelocidadFluido(Tfo)
+salida[1] = [0, climaObj.Ta, flujoMasico[seleccion][2][2], flujoMasico[seleccion][2][3], flujoMasico[seleccion][2][4], climaObj.T1, climaObj.T15, climaObj.velocidadViento, climaObj.radicacion, flujoMasico[seleccion][3], flujoMasico[seleccion][0], flujoMasico[seleccion][1], flujoMasico[seleccion][2][1], climaObj.velocidadViento, Tfo, velocidadVientoFluido]
 dia = climaObj.tamb.__len__()
 vuelta = 1
 while vuelta < dia:
@@ -65,11 +78,13 @@ while vuelta < dia:
         # seleccion = entero(flujoMasico.__len__())
         flujoMasico = procesos.calcularFlujoMasico(menores)
         flujoMasico = procesos.getOptimos(flujoMasico, vuelta, salida)
-        mostrarValoresMenores(flujoMasico,climaObj)
+        Tfo = procesos.calcularTempFluidoSalida(flujoMasico[seleccion][2][3])
+        velocidadVientoFluido = procesos.calcularVelocidadFluido(Tfo)
+        mostrarValoresMenores(flujoMasico,climaObj, 3)
         vuelta = vuelta + 1
         salida.append([])
-        print("Vuelta " + str(vuelta) + " Ta " + str(climaObj.Ta) + " To " + str(flujoMasico[seleccion][2][2]) + " Tg " + str(flujoMasico[seleccion][2][3]) + " Tf " + str(flujoMasico[seleccion][2][4]) + " Ap " + str(flujoMasico[seleccion][2][1]))
-        salida[vuelta] = [vuelta, climaObj.Ta, flujoMasico[seleccion][2][2], flujoMasico[seleccion][2][3], flujoMasico[seleccion][2][4], climaObj.T1, climaObj.T15, climaObj.velocidadViento, climaObj.radicacion, flujoMasico[seleccion][3], flujoMasico[seleccion][0], flujoMasico[seleccion][1], flujoMasico[seleccion][2][1], climaObj.velocidadViento]
+        print("Vuelta " + str(vuelta) + " Ta " + str(climaObj.Ta) + " To " + str(flujoMasico[seleccion][2][2]) + " Tg " + str(flujoMasico[seleccion][2][3]) + " Tf " + str(flujoMasico[seleccion][2][4]) + " Ap " + str(flujoMasico[seleccion][2][1]) + " Tfo " + str(Tfo) + " VelFluio " + str(velocidadVientoFluido))
+        salida[vuelta] = [vuelta, climaObj.Ta, flujoMasico[seleccion][2][2], flujoMasico[seleccion][2][3], flujoMasico[seleccion][2][4], climaObj.T1, climaObj.T15, climaObj.velocidadViento, climaObj.radicacion, flujoMasico[seleccion][3], flujoMasico[seleccion][0], flujoMasico[seleccion][1], flujoMasico[seleccion][2][1], climaObj.velocidadViento, Tfo, velocidadVientoFluido]
     else:
         print("No existen valores de aproximación en la vuelta " + str(vuelta))
         break

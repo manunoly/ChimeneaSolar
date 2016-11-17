@@ -12,9 +12,9 @@ from tareaCalcularProcesos2 import TareaCalcularSegundaFase
 from decimal import *
 import time, os, math
 
-getcontext().prec = 10
 
 class Procesos:
+    getcontext().prec = 10
 
     def __init__(self, clima = None, pared = None, vidrio = None, chimenea = None):
         if clima is None:
@@ -86,6 +86,16 @@ class Procesos:
 
         print("Creados " + str(cant) + " procesos")
         return piscina
+
+    def calcularTempFluidoSalida(self,Tf):
+        return (Tf - (1-self.pared.Si) * self.clima.Ta) / self.pared.Si
+
+    def calcularVelocidadFluido(self, Tfo):
+        tmp = Tfo - self.clima.Ta
+        if tmp > 1:
+            return Decimal(math.sqrt(self.clima.cd * self.pared.Ao * (2 * (Tfo - self.clima.Ta) / self.clima.Ta) * self.clima.gravedad * self.pared.l)) * (1 / Decimal(math.sqrt(1 + (self.pared.Ai / self.pared.Ao) ** 2))) / (self.pared.W * self.pared.Ad)
+        else:
+            return 0
 
     def calcularFlujoMasico(self,datosM, orderFM = False):
         #vueltas, menorValor, To, Tg , Tf,round(aproximado, 5), hw, sw, hrwg, hg

@@ -1,10 +1,10 @@
 __author__ = 'manuel'
 from decimal import *
-getcontext().prec = 10
+
 
 class VidrioPropiedades:
 
-
+    getcontext().prec = 10
     #propiedades del vidrio
     T = Decimal(0.84) #transmitancia
     absortancia = Decimal(0) # absortancia
