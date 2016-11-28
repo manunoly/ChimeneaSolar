@@ -22,9 +22,7 @@ class ChimeneaSolar:
         hrwg = 0
         #temp pared del extremo inicial, puede ser una constante o toca investigar como hacer su calculo inicial. la T1 va variando con el tiempo.
         #valor inicial
-        T1 = Decimal(308)
         #temp pared otro extremo puede ser una constante o toca investigar como hacer su calculo inicial. la T15 va variando con el tiempo. 308 valor inicial luego se calcula
-        T15 = Decimal(308.0)
         #valor cuando varia la temperatura, seria en la proxima hora.
         #T15 = ((((k / x)*(T1 - T15[0])) - (hwind * (T15[0] - Ta[0]))))
         #

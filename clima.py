@@ -44,6 +44,7 @@ class ClimaPropiedades:
                     self.rad.append(Decimal(datosP[posRad]))
                     self.rh.append(Decimal(datosP[posRH]))
                 if i > fin:
+                    data.close()
                     break
         except Exception:
             pass
