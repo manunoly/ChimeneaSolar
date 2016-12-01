@@ -7,9 +7,9 @@ class ChimeneaSolar:
     getcontext().prec = 10
 
     def __init__(self, clima, pared, vidrio):
-        self.__vidrioP = vidrio
-        self.__paredP = pared
-        self.__climaP = clima
+        self.vidrio = vidrio
+        self.pared = pared
+        self.clima = clima
 
     #aberturas de ingreso y salida del aire
     ancho = Decimal(0)
@@ -29,18 +29,18 @@ class ChimeneaSolar:
         # data = [To + Tg + Tf, 1, 2, 3]
         # return data
         # Calculo de Sw calor de radiacion
-        sw = self.__vidrioP.T * self.__paredP.alphap * self.__climaP.radicacion
+        sw = self.vidrio.T * self.pared.alphap * self.clima.radicacion
         # Calcular Sg calor de radiacion en el vidrio
         # la radiacion va variando a cada hora segun condiciones climaticas
-        sg = self.__vidrioP.alphav * self.__climaP.radicacion
+        sg = self.vidrio.alphav * self.clima.radicacion
         # hwind coeficiente de transferencia de calor por conveccion del viento externo       #la Tg Tf To temp deben ir variando dentro de las siguientes formulas
         #con el valor inicial de las var anteriores calcular
         # hrwg  coeficiente de radiacion entre la pared y el vidrio
         # hrgs  coeficiente de radiacion entre el vidrio y el ambiente
         # hrws  coeficiente de radiacion entre la pared y el ambiente
-        hrwg =  round(SteffanBoltzmann * (((Tg ** Decimal(2) + To ** Decimal(2))* (Tg + To))/((Decimal(1)/self.__vidrioP.ev)+(Decimal(1)/self.__paredP.ep)- Decimal(1))),5)
-        hrgs = round((SteffanBoltzmann * self.__vidrioP.ev) * (Tg + self.__climaP.Ts) * (Tg ** Decimal(2) + self.__climaP.Ts ** Decimal(2)),5)
-        #hrws = (SteffanBoltzmann * self.__paredP.ep) * (T15 + self.__climaP.Ts) * (T15 ** 2 + self.__climaP.Ts ** 2)
+        hrwg =  round(SteffanBoltzmann * (((Tg ** Decimal(2) + To ** Decimal(2))* (Tg + To))/((Decimal(1)/self.vidrio.ev)+(Decimal(1)/self.pared.ep)- Decimal(1))),5)
+        hrgs = round((SteffanBoltzmann * self.vidrio.ev) * (Tg + self.clima.Ts) * (Tg ** Decimal(2) + self.clima.Ts ** Decimal(2)),5)
+        #hrws = (SteffanBoltzmann * self.pared.ep) * (T15 + self.clima.Ts) * (T15 ** 2 + self.clima.Ts ** 2)
 
         #vamos a calcular las propiedades del vidrio - aire
         tmva = (Tg + Tf)/Decimal(2)
@@ -51,16 +51,16 @@ class ChimeneaSolar:
         betava = Decimal(1)/tmva
 
         deltava = Decimal(abs(Tg - Tf))
-        prva = (ufva * cpva) / condva
+        prva = ufva * cpva / condva
         vfva = ufva / densva
-        grva = (Decimal(9.8) * betava * deltava * (self.__paredP.l ** Decimal(3))) / (vfva ** Decimal(2))
+        grva = (Decimal(9.8) * betava * deltava * (self.pared.l ** Decimal(3))) / (vfva ** Decimal(2))
         rava = prva * grva
         if rava < Decimal(10) ** Decimal(9):
             nusseltva = Decimal(0.68) + (Decimal(0.67) * rava ** (Decimal(1)/Decimal(4))) / (Decimal(1) + (Decimal(0.492) / prva) ** (Decimal(9) / Decimal(16))) ** (Decimal(4) /Decimal(9))
         else:
             nusseltva = (Decimal(0.825) + (Decimal(0.387) * (rava ** (Decimal(1)/Decimal(6)))) / (Decimal(1) + (Decimal(0.492) / prva) **(Decimal(9)/Decimal(16))) **(Decimal(8) / Decimal(27))) ** Decimal(2)
 
-        hg = (nusseltva * condva) / self.__paredP.l
+        hg = (nusseltva * condva) / self.pared.l
 
         # vamos a calcular las propiedades de la pared - aire
         tmpa = (Tf + To) / Decimal(2)
@@ -72,21 +72,21 @@ class ChimeneaSolar:
         deltapa = Decimal(abs(To - Tf))
         prpa = (ufpa * cppa) / condpa
         vfpa = ufpa / denspa
-        grpa = (Decimal(9.8) * betapa * deltapa * (self.__paredP.l ** Decimal(3))) / (vfpa ** Decimal(2))
+        grpa = (Decimal(9.8) * betapa * deltapa * (self.pared.l ** Decimal(3))) / (vfpa ** Decimal(2))
         rapa = prpa * grpa
         if rapa < Decimal(10) ** Decimal(9):
             nusseltpa = Decimal(0.68) + (Decimal(0.67) * rapa ** (Decimal(1)/Decimal(4))) / (Decimal(1) + (Decimal(0.492) / prpa) ** (Decimal(9) / Decimal(16))) ** (Decimal(4) / Decimal(9))
         else:
             nusseltpa = (Decimal(0.825) + (Decimal(0.387) * (rapa ** (Decimal(1)/Decimal(6)))) / (Decimal(1) + (Decimal(0.492) / prpa) **(Decimal(9)/Decimal(16))) **(Decimal(8) / Decimal(27))) ** Decimal(2)
 
-        hw = (nusseltpa * condpa) / self.__paredP.l
+        hw = (nusseltpa * condpa) / self.pared.l
 
         #hay q variar To, Tg, Tf para que aproximado de 0
         # variar To, comenzar con temp ambiental y variar 50 mas
         # variar Tg comenzar con temp ambiental  y variar 2 mas
         # variar Tf comenzar con Tg y terminar con To pq siempre tiene q estar en este rango.
 
-        aproximado = Decimal(sg + (hg * (Tf - Tg)) + (hrwg * (To - Tg)) - (self.__climaP.hwind * (Tg - self.__climaP.Ta)) - (hrgs * (Tg - self.__climaP.Ts)))
+        aproximado = Decimal(sg + (hg * (Tf - Tg)) + (hrwg * (To - Tg)) - (self.clima.hwind * (Tg - self.clima.Ta)) - (hrgs * (Tg - self.clima.Ts)))
         data = [round(aproximado, 5), hw, sw, hrwg, denspa]
         return data
         # return aproximado
