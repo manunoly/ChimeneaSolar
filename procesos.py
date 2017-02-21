@@ -9,6 +9,8 @@ from paredPropiedades import ParedPropiedades
 from vidrioPropiedades import VidrioPropiedades
 from chimeneaSolar import ChimeneaSolar
 from tareaCalcularProcesos2 import TareaCalcularSegundaFase
+from aislantePropiedades import AislantePropiedades
+from maderaPropiedades import MaderaPropiedades
 from decimal import *
 import time, os, math
 
@@ -23,6 +25,8 @@ class Procesos:
         if pared is None:
             pared = ParedPropiedades()
         self.pared = pared
+        self.aislante = AislantePropiedades()
+        self.madera = MaderaPropiedades
         if vidrio is None:
             vidrio = VidrioPropiedades
         self.vidrio = vidrio
@@ -174,9 +178,9 @@ class Procesos:
         #flujoMasicoApromado0, valorRotacion, [vueltas, menorValor, To, Tg , Tf,round(aproximado, 5), hw, sw, hrwg, hg], FM
         # resultados = "Vuelta,Ta,To;Tg;Tf;T1;T15;velocidadViento,radicacion,FM;AproximacionFMa0;variacionFM;Aproximacion0"
         if vuelta > 0:
-            print(self.clima.Ta)
-            print(self.clima.tamb[vuelta])
-            print(resultados[vuelta])
+            # print(self.clima.Ta)
+            # print(self.clima.tamb[vuelta])
+            # print(resultados[vuelta])
             for valor in valores:
                 valor.append(0)
                 # if self.clima.rad[vuelta - 1] >= self.clima.rad[vuelta - 1]:
@@ -283,11 +287,17 @@ class Procesos:
         To1 = ((sw -(hw *(To - Tf)) - (hrwg * (To - Tg)) - ((self.pared.kp / self.pared.x) * (To - self.clima.T1))) * ((2 * 3600) / (self.pared.cpp * self.pared.densp * self.pared.x))) + To
         T11 = (((self.pared.diff * tiempoActual) / self.pared.x ** 2 ) * (self.clima.T15 + To - (2 * self.clima.T1))) + self.clima.T1
         T15_1 = ((((self.pared.kp / self.pared.x) * (self.clima.T1 - self.clima.T15)) - (self.clima.hwind * (self.clima.T15 - self.clima.Ta)) - (hrws * (self.clima.T15 - self.clima.Ts))) * ((2 * tiempoActual) / (self.pared.densp * self.pared.cpp * self.pared.x))) + self.clima.T15
+        Tr_start = ((2 * self.pared.kp / self.pared.x) * (T11 - self.clima.Tr) - (2 * self.aislante.kr / self.aislante.xr) * (self.clima.Tr - self.clima.Tr1)) * (3600 / (((self.pared.densp * self.pared.cpp * self.pared.x) / 4) + ((self.aislante.densr * self.aislante.cr * self.aislante.xr) / 4))) + self.clima.Tr
+        Tr_midle = ((self.aislante.kr * 3600) / (self.aislante.densr * self.aislante.cr * (self.aislante.xr / 2) ** 2)) * (self.clima.Tw + self.clima.Tr - 2 * self.clima.Tr1) + self.clima.Tr1
+        Tw_start = ((2 * self.aislante.kr / self.aislante.xr) * (self.clima.Tr1 - self.clima.Tw) - (2 * self.madera.kw / self.madera.xw) * (self.clima.Tr1 - self.clima.Tw1)) * (3600 / (((self.aislante.kr * self.aislante.cr * self.aislante.xr) / 4) + ((self.madera.densw * self.madera.cw * self.madera.xw) / 4))) + self.clima.Tw
+        Tw_midle = ((self.madera.kw * 3600) / (self.madera.densw * self.madera.cw * (self.madera.xw / 2) ** 2)) * (self.clima.Tw_end + self.clima.Tw - 2 * self.clima.Tw1) + self.clima.Tw1
+        Ts_end = ((2 * self.madera.kw / self.madera.xw) * (self.clima.Tw1 - self.clima.Tw_end) - self.clima.hwind * (self.clima.Tw_end - self.clima.Ta) - hrws * (self.clima.Tw_end - self.clima.Ts)) * ((4 * 3600) / (self.madera.densw * self.madera.cw * self.madera.xw)) + self.clima.Tw_end
+
         # self.clima.Ta = self.clima.Ta - 1
         self.clima.actualizarDatosHora(vuelta)
         self.clima.T15 = T15_1
         self.clima.T1 = T11
-        temp = [To1, T11, T15_1]
+        temp = [To1, T11, T15_1, Tr_start, Tr_midle, Tw_start, Tw_midle, Ts_end]
         return temp
 
     def iniciarProcesoSegundaFase(self,cola, To):

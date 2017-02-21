@@ -5,21 +5,21 @@ from decimal import *
 class ParedPropiedades:
     getcontext().prec = 10
     ## variables de la pared
-    kp = Decimal(1.63)  # conductividad termica
-    cpp = Decimal(1090)    # calor especifico pared especifico
-    densp = Decimal(2400)
+    kp = Decimal(1.4)  # conductividad termica
+    cpp = Decimal(837)    # calor especifico pared especifico
+    densp = Decimal(2220)
     alphap = Decimal(0.82) ## absortividad
     ep  = Decimal(0.95)  ## emisividad
     diff  = Decimal(6.23) * Decimal(10) ** Decimal(-7)  ## difusividad terminca  -- calculable
-    x = Decimal(0.12) # distancia entre las divisiones de la pared
+    x = Decimal(0.15) # distancia entre las divisiones de la pared
     # numero de biot a
     a = (alphap * Decimal(60)) / (Decimal(0.015) ** Decimal(2)) # conducti -- calculable
     estabilidad  = (diff * Decimal(3600)) / x # estabilidad  -- calculable
-    l  = Decimal(2)  ## altura de la pared
-    W = Decimal(0.145)
+    l  = Decimal(3)  ## altura de la pared
+    W = Decimal(0.2)
     # area de outlet inlet
-    Ao = Decimal(0.025)
-    Ai = Decimal(0.025)
+    Ao = Decimal(0.01)
+    Ai = Decimal(0.01)
     Si = Decimal(0.75)
     Ad = Decimal(1.5) # Ancho del ducto
 

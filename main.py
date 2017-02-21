@@ -41,6 +41,9 @@ climaObj = procesos.getClimaObjeto()
 # plt.yscale('linear')
 # plt.show()
 # exit()
+#0.007283916034 FM - 0.007283916034 To - 308.4000000 Tg - 296.7500000 Tf - 307.5500000 Aprox a 0 - -0.00020
+#To, Tg, Tf, hw, sw, hrwg, vuelta
+# nuevasTemp = procesos.calcularSegundaFase(Decimal(308.4000000), 296.7500000, 307.5500000, flujoMasico[seleccion][2][6], flujoMasico[seleccion][2][7], flujoMasico[seleccion][2][8], vuelta)
 
 piscina = procesos.iniciarProcesos(cola)
 procesos.esperar(piscina)
@@ -67,7 +70,11 @@ salida[1] = [0, climaObj.Ta, flujoMasico[seleccion][2][2], flujoMasico[seleccion
 dia = climaObj.tamb.__len__()
 vuelta = 1
 while vuelta < dia:
+    print(vuelta)
+    print(flujoMasico)
     nuevasTemp = procesos.calcularSegundaFase(flujoMasico[seleccion][2][2], flujoMasico[seleccion][2][3], flujoMasico[seleccion][2][4], flujoMasico[seleccion][2][6], flujoMasico[seleccion][2][7], flujoMasico[seleccion][2][8], vuelta)
+    print(nuevasTemp)
+    piscina = procesos.iniciarProcesoSegundaFase(cola, nuevasTemp[0])
     piscina = procesos.iniciarProcesoSegundaFase(cola, nuevasTemp[0])
     procesos.esperar(piscina)
     menores = procesos.getMejores(cola)
