@@ -41,9 +41,6 @@ climaObj = procesos.getClimaObjeto()
 # plt.yscale('linear')
 # plt.show()
 # exit()
-#0.007283916034 FM - 0.007283916034 To - 308.4000000 Tg - 296.7500000 Tf - 307.5500000 Aprox a 0 - -0.00020
-#To, Tg, Tf, hw, sw, hrwg, vuelta
-# nuevasTemp = procesos.calcularSegundaFase(Decimal(308.4000000), 296.7500000, 307.5500000, flujoMasico[seleccion][2][6], flujoMasico[seleccion][2][7], flujoMasico[seleccion][2][8], vuelta)
 
 piscina = procesos.iniciarProcesos(cola)
 procesos.esperar(piscina)
@@ -56,7 +53,7 @@ else:
     print("No existen valores de aproximación menores a 1 en la vuelta 0")
     exit()
 
-mostrarValoresMenores(flujoMasico, climaObj)
+# mostrarValoresMenores(flujoMasico, climaObj)
 # seleccion = entero(flujoMasico.__len__())
 seleccion = 0
 print("Vuelta 0  To " + str(flujoMasico[seleccion][2][2]) + " Tg " + str(flujoMasico[seleccion][2][3]) + " Tf " + str(flujoMasico[seleccion][2][4]))
@@ -69,12 +66,11 @@ velocidadVientoFluido = procesos.calcularVelocidadFluido(Tfo)
 salida[1] = [0, climaObj.Ta, flujoMasico[seleccion][2][2], flujoMasico[seleccion][2][3], flujoMasico[seleccion][2][4], climaObj.T1, climaObj.T15, climaObj.velocidadViento, climaObj.radicacion, flujoMasico[seleccion][3], flujoMasico[seleccion][0], flujoMasico[seleccion][1], flujoMasico[seleccion][2][1], climaObj.velocidadViento, Tfo, velocidadVientoFluido]
 dia = climaObj.tamb.__len__()
 vuelta = 1
+nuevasTemperaturas = []
 while vuelta < dia:
-    print(vuelta)
-    print(flujoMasico)
     nuevasTemp = procesos.calcularSegundaFase(flujoMasico[seleccion][2][2], flujoMasico[seleccion][2][3], flujoMasico[seleccion][2][4], flujoMasico[seleccion][2][6], flujoMasico[seleccion][2][7], flujoMasico[seleccion][2][8], vuelta)
+    nuevasTemperaturas.append(nuevasTemp)
     print(nuevasTemp)
-    piscina = procesos.iniciarProcesoSegundaFase(cola, nuevasTemp[0])
     piscina = procesos.iniciarProcesoSegundaFase(cola, nuevasTemp[0])
     procesos.esperar(piscina)
     menores = procesos.getMejores(cola)
@@ -87,7 +83,7 @@ while vuelta < dia:
         flujoMasico = procesos.getOptimos(flujoMasico, vuelta, salida)
         Tfo = procesos.calcularTempFluidoSalida(flujoMasico[seleccion][2][3])
         velocidadVientoFluido = procesos.calcularVelocidadFluido(Tfo)
-        mostrarValoresMenores(flujoMasico,climaObj, 3)
+        # mostrarValoresMenores(flujoMasico,climaObj, 3)
         vuelta = vuelta + 1
         salida.append([])
         print("Vuelta " + str(vuelta) + " Ta " + str(climaObj.Ta) + " To " + str(flujoMasico[seleccion][2][2]) + " Tg " + str(flujoMasico[seleccion][2][3]) + " Tf " + str(flujoMasico[seleccion][2][4]) + " Ap " + str(flujoMasico[seleccion][2][1]) + " Tfo " + str(Tfo) + " VelFluio " + str(velocidadVientoFluido))
@@ -98,6 +94,7 @@ while vuelta < dia:
 
 # except Exception:
 #     pass
+[print(temp) for temp in nuevasTemperaturas]
 
 fecha = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 file ="./" + fecha + "_salidaSimulacion.csv"

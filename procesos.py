@@ -295,6 +295,11 @@ class Procesos:
 
         # self.clima.Ta = self.clima.Ta - 1
         self.clima.actualizarDatosHora(vuelta)
+        self.clima.Tr = Tr_start
+        self.clima.Tr1 = Tr_midle
+        self.clima.Tw = Tw_start
+        self.clima.Tw1 = Tw_midle
+        self.clima.Tw_end = Ts_end
         self.clima.T15 = T15_1
         self.clima.T1 = T11
         temp = [To1, T11, T15_1, Tr_start, Tr_midle, Tw_start, Tw_midle, Ts_end]
