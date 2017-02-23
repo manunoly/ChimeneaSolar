@@ -286,12 +286,15 @@ class Procesos:
         # de donde sale la variable kp
         To1 = ((sw -(hw *(To - Tf)) - (hrwg * (To - Tg)) - ((self.pared.kp / self.pared.x) * (To - self.clima.T1))) * ((2 * 3600) / (self.pared.cpp * self.pared.densp * self.pared.x))) + To
         T11 = (((self.pared.diff * tiempoActual) / self.pared.x ** 2 ) * (self.clima.T15 + To - (2 * self.clima.T1))) + self.clima.T1
-        T15_1 = ((((self.pared.kp / self.pared.x) * (self.clima.T1 - self.clima.T15)) - (self.clima.hwind * (self.clima.T15 - self.clima.Ta)) - (hrws * (self.clima.T15 - self.clima.Ts))) * ((2 * tiempoActual) / (self.pared.densp * self.pared.cpp * self.pared.x))) + self.clima.T15
-        Tr_start = ((2 * self.pared.kp / self.pared.x) * (T11 - self.clima.Tr) - (2 * self.aislante.kr / self.aislante.xr) * (self.clima.Tr - self.clima.Tr1)) * (3600 / (((self.pared.densp * self.pared.cpp * self.pared.x) / 4) + ((self.aislante.densr * self.aislante.cr * self.aislante.xr) / 4))) + self.clima.Tr
-        Tr_midle = ((self.aislante.kr * 3600) / (self.aislante.densr * self.aislante.cr * (self.aislante.xr / 2) ** 2)) * (self.clima.Tw + self.clima.Tr - 2 * self.clima.Tr1) + self.clima.Tr1
-        Tw_start = ((2 * self.aislante.kr / self.aislante.xr) * (self.clima.Tr1 - self.clima.Tw) - (2 * self.madera.kw / self.madera.xw) * (self.clima.Tr1 - self.clima.Tw1)) * (3600 / (((self.aislante.kr * self.aislante.cr * self.aislante.xr) / 4) + ((self.madera.densw * self.madera.cw * self.madera.xw) / 4))) + self.clima.Tw
-        Tw_midle = ((self.madera.kw * 3600) / (self.madera.densw * self.madera.cw * (self.madera.xw / 2) ** 2)) * (self.clima.Tw_end + self.clima.Tw - 2 * self.clima.Tw1) + self.clima.Tw1
-        Ts_end = ((2 * self.madera.kw / self.madera.xw) * (self.clima.Tw1 - self.clima.Tw_end) - self.clima.hwind * (self.clima.Tw_end - self.clima.Ta) - hrws * (self.clima.Tw_end - self.clima.Ts)) * ((4 * 3600) / (self.madera.densw * self.madera.cw * self.madera.xw)) + self.clima.Tw_end
+        T15_1 = ((((self.pared.kp / self.pared.x) * (self.clima.T1 - self.clima.T15)) - (self.clima.hwind * (self.clima.T15 - self.clima.Ta)) - (hrws * (self.clima.T15 - self.clima.Ts))) * ((2 * 3600) / (self.pared.densp * self.pared.cpp * self.pared.x))) + self.clima.T15
+
+        Tr_start = ((2 * self.pared.kp / self.pared.x) * (self.clima.T1 - self.clima.Tr) - (2 * self.aislante.kr / self.aislante.xr) * (self.clima.Tr - self.clima.Tr1)) * (3600 / (((self.pared.densp * self.pared.cpp * self.pared.x) / 4) + ((self.aislante.densr * self.aislante.cr * self.aislante.xr) / 4))) + self.clima.Tr
+        Tw_start = ((2 * self.aislante.kr / self.aislante.xr) * (self.clima.Tr1 - self.clima.Tw) - (2 * self.madera.kw / self.madera.xw) * (self.clima.Tr1 - self.clima.Tw1)) * (3600 / (((self.aislante.densr * self.aislante.cr * self.aislante.xr) / 4) + ((self.madera.densw * self.madera.cw * self.madera.xw) / 4))) + self.clima.Tw
+
+        Tr_midle = ((self.aislante.kr * 3600) / (self.aislante.densr * self.aislante.cr * ((self.aislante.xr / 2) ** 2))) * (self.clima.Tw + self.clima.Tr - (2 * self.clima.Tr1)) + self.clima.Tr1
+        Tw_midle = ((self.madera.kw * 3600) / (self.madera.densw * self.madera.cw * ((self.madera.xw / 2) ** 2))) * (self.clima.Tw_end + self.clima.Tw - (2 * self.clima.Tw1)) + self.clima.Tw1
+
+        Tw_end = ((2 * self.madera.kw / self.madera.xw) * (self.clima.Tw1 - self.clima.Tw_end) - self.clima.hwind * (self.clima.Tw_end - self.clima.Ta) - hrws * (self.clima.Tw_end - self.clima.Ts)) * ((4 * 3600) / (self.madera.densw * self.madera.cw * self.madera.xw)) + self.clima.Tw_end
 
         # self.clima.Ta = self.clima.Ta - 1
         self.clima.actualizarDatosHora(vuelta)
@@ -299,10 +302,10 @@ class Procesos:
         self.clima.Tr1 = Tr_midle
         self.clima.Tw = Tw_start
         self.clima.Tw1 = Tw_midle
-        self.clima.Tw_end = Ts_end
+        self.clima.Tw_end = Tw_end
         self.clima.T15 = T15_1
         self.clima.T1 = T11
-        temp = [To1, T11, T15_1, Tr_start, Tr_midle, Tw_start, Tw_midle, Ts_end]
+        temp = [To1, T11, T15_1, Tr_start, Tr_midle, Tw_start, Tw_midle, Tw_end]
         return temp
 
     def iniciarProcesoSegundaFase(self,cola, To):

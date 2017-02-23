@@ -10,7 +10,7 @@ class ParedPropiedades:
     densp = Decimal(2220)
     alphap = Decimal(0.82) ## absortividad
     ep  = Decimal(0.95)  ## emisividad
-    diff  = Decimal(6.23) * Decimal(10) ** Decimal(-7)  ## difusividad terminca  -- calculable
+    diff  = Decimal(7.53) * Decimal(10) ** Decimal(-7)  ## difusividad terminca  -- calculable
     x = Decimal(0.15) # distancia entre las divisiones de la pared
     # numero de biot a
     a = (alphap * Decimal(60)) / (Decimal(0.015) ** Decimal(2)) # conducti -- calculable
@@ -18,10 +18,10 @@ class ParedPropiedades:
     l  = Decimal(3)  ## altura de la pared
     W = Decimal(0.2)
     # area de outlet inlet
-    Ao = Decimal(0.01)
-    Ai = Decimal(0.01)
+    Ao = Decimal(0.19)
+    Ai = Decimal(0.039)
     Si = Decimal(0.75)
-    Ad = Decimal(1.5) # Ancho del ducto
+    Ad = Decimal(1) # Ancho del ducto
 
     # propiedades pared - aire
     ufpa = Decimal(0) #viscocidad cinematica de la pared-aire

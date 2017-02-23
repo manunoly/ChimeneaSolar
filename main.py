@@ -31,6 +31,7 @@ def mostrarValoresMenores(menores, climaObj = None, limite = 100):
         if i > limite:
             break
         i = i +1
+
 # try:
 cola = Queue()
 procesos = Procesos()
@@ -59,22 +60,19 @@ seleccion = 0
 print("Vuelta 0  To " + str(flujoMasico[seleccion][2][2]) + " Tg " + str(flujoMasico[seleccion][2][3]) + " Tf " + str(flujoMasico[seleccion][2][4]))
 salida = []
 salida.append([])
-salida[0] = ["Vuelta;Ta;To;Tg;Tf;T1;T15;velocidadViento;radicacion;FM;AproximacionFMa0;variacionFM;Aproximacion0;VelocidadV;Tf-o;velTf"]
+salida[0] = ["Vuelta;Ta;To;Tg;Tf;T1;T15;velocidadViento;radicacion;FM;AproximacionFMa0;variacionFM;Aproximacion0;VelocidadV;Tf-o;velTf;Tr_start;Tr_midle;Tw_start;Tw_midle;Ts_end"]
 salida.append([])
 Tfo = procesos.calcularTempFluidoSalida(flujoMasico[seleccion][2][3])
 velocidadVientoFluido = procesos.calcularVelocidadFluido(Tfo)
-salida[1] = [0, climaObj.Ta, flujoMasico[seleccion][2][2], flujoMasico[seleccion][2][3], flujoMasico[seleccion][2][4], climaObj.T1, climaObj.T15, climaObj.velocidadViento, climaObj.radicacion, flujoMasico[seleccion][3], flujoMasico[seleccion][0], flujoMasico[seleccion][1], flujoMasico[seleccion][2][1], climaObj.velocidadViento, Tfo, velocidadVientoFluido]
+salida[1] = [0, climaObj.Ta, flujoMasico[seleccion][2][2], flujoMasico[seleccion][2][3], flujoMasico[seleccion][2][4], climaObj.T1, climaObj.T15, climaObj.velocidadViento, climaObj.radicacion, flujoMasico[seleccion][3], flujoMasico[seleccion][0], flujoMasico[seleccion][1], flujoMasico[seleccion][2][1], climaObj.velocidadViento, Tfo, velocidadVientoFluido, climaObj.Tr,climaObj.Tr1, climaObj.Tw, climaObj.Tw1, climaObj.Tw_end]
 dia = climaObj.tamb.__len__()
+
 vuelta = 1
-nuevasTemperaturas = []
 while vuelta < dia:
     nuevasTemp = procesos.calcularSegundaFase(flujoMasico[seleccion][2][2], flujoMasico[seleccion][2][3], flujoMasico[seleccion][2][4], flujoMasico[seleccion][2][6], flujoMasico[seleccion][2][7], flujoMasico[seleccion][2][8], vuelta)
-    nuevasTemperaturas.append(nuevasTemp)
-    print(nuevasTemp)
     piscina = procesos.iniciarProcesoSegundaFase(cola, nuevasTemp[0])
     procesos.esperar(piscina)
     menores = procesos.getMejores(cola)
-
     if menores.__len__() >= 1:
         # seleccion = 0
         # mostrarValoresMenores(flujoMasico, climaObj)
@@ -83,18 +81,17 @@ while vuelta < dia:
         flujoMasico = procesos.getOptimos(flujoMasico, vuelta, salida)
         Tfo = procesos.calcularTempFluidoSalida(flujoMasico[seleccion][2][3])
         velocidadVientoFluido = procesos.calcularVelocidadFluido(Tfo)
-        # mostrarValoresMenores(flujoMasico,climaObj, 3)
+        mostrarValoresMenores(flujoMasico,climaObj, 3)
         vuelta = vuelta + 1
         salida.append([])
         print("Vuelta " + str(vuelta) + " Ta " + str(climaObj.Ta) + " To " + str(flujoMasico[seleccion][2][2]) + " Tg " + str(flujoMasico[seleccion][2][3]) + " Tf " + str(flujoMasico[seleccion][2][4]) + " Ap " + str(flujoMasico[seleccion][2][1]) + " Tfo " + str(Tfo) + " VelFluio " + str(velocidadVientoFluido))
-        salida[vuelta] = [vuelta, climaObj.Ta, flujoMasico[seleccion][2][2], flujoMasico[seleccion][2][3], flujoMasico[seleccion][2][4], climaObj.T1, climaObj.T15, climaObj.velocidadViento, climaObj.radicacion, flujoMasico[seleccion][3], flujoMasico[seleccion][0], flujoMasico[seleccion][1], flujoMasico[seleccion][2][1], climaObj.velocidadViento, Tfo, velocidadVientoFluido]
+        salida[vuelta] = [vuelta, climaObj.Ta, flujoMasico[seleccion][2][2], flujoMasico[seleccion][2][3], flujoMasico[seleccion][2][4], climaObj.T1, climaObj.T15, climaObj.velocidadViento, climaObj.radicacion, flujoMasico[seleccion][3], flujoMasico[seleccion][0], flujoMasico[seleccion][1], flujoMasico[seleccion][2][1], climaObj.velocidadViento, Tfo, velocidadVientoFluido,nuevasTemp[3],nuevasTemp[4],nuevasTemp[5],nuevasTemp[6],nuevasTemp[7]]
     else:
         print("No existen valores de aproximación en la vuelta " + str(vuelta))
         break
 
 # except Exception:
 #     pass
-[print(temp) for temp in nuevasTemperaturas]
 
 fecha = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 file ="./" + fecha + "_salidaSimulacion.csv"
