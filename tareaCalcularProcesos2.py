@@ -14,7 +14,7 @@ class TareaCalcularSegundaFase:
 
     def calcularSegundaFase(self):
         Tf = self.__Tg
-        menorValor = 100
+        menorValor = 100000
         if (self.__Tg <= self.__To):
             while Tf <= self.__To:
                 a = self.__chimenea.calcular(self.__To, self.__Tg, Tf)

@@ -53,7 +53,7 @@ else:
     print("No existen valores de aproximación menores a 1 en la vuelta 0")
     exit()
 
-mostrarValoresMenores(flujoMasico, climaObj)
+# mostrarValoresMenores(flujoMasico, climaObj)
 # seleccion = entero(flujoMasico.__len__())
 seleccion = 0
 print("Vuelta 0  To " + str(flujoMasico[seleccion][2][2]) + " Tg " + str(flujoMasico[seleccion][2][3]) + " Tf " + str(flujoMasico[seleccion][2][4]))
@@ -80,7 +80,7 @@ while vuelta < dia:
         flujoMasico = procesos.getOptimos(flujoMasico, vuelta, salida)
         Tfo = procesos.calcularTempFluidoSalida(flujoMasico[seleccion][2][3])
         velocidadVientoFluido = procesos.calcularVelocidadFluido(Tfo)
-        mostrarValoresMenores(flujoMasico,climaObj, 3)
+        # mostrarValoresMenores(flujoMasico,climaObj, 3)
         vuelta = vuelta + 1
         salida.append([])
         print("Vuelta " + str(vuelta) + " Ta " + str(climaObj.Ta) + " To " + str(flujoMasico[seleccion][2][2]) + " Tg " + str(flujoMasico[seleccion][2][3]) + " Tf " + str(flujoMasico[seleccion][2][4]) + " Ap " + str(flujoMasico[seleccion][2][1]) + " Tfo " + str(Tfo) + " VelFluio " + str(velocidadVientoFluido))

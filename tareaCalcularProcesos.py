@@ -53,9 +53,12 @@ class TareaCalcular:
             # vueltasTg = vueltasTg + Tg
             # vueltas = vueltas + 1
             # print("proceso " + str(i))
-
+            firt = True
             while Tf <= To:
                 a = self.__chimenea.calcular(Decimal(To), Decimal(self.__rangoInferiorTg), Decimal(Tf))
+                if (firt):
+                    menorValor = abs(a[0])
+                    firt = False
             #     vueltas = vueltas + 1
                 if abs(a[0]) < menorValor:
                     menorValor = abs(a[0])

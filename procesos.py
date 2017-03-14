@@ -53,7 +53,7 @@ class Procesos:
         if Tg is None:
             Tg = self.clima.Ta
         if rangoTg is None:
-            rangoTg = Decimal(2)
+            rangoTg = Decimal(8)
         rangoSuperiorTg = Tg + rangoTg
         rangoInferiorTg = Tg
         resultado = []
@@ -174,9 +174,9 @@ class Procesos:
         #flujoMasicoApromado0, valorRotacion, [vueltas, menorValor, To, Tg , Tf,round(aproximado, 5), hw, sw, hrwg, hg], FM
         # resultados = "Vuelta,Ta,To;Tg;Tf;T1;T15;velocidadViento,radicacion,FM;AproximacionFMa0;variacionFM;Aproximacion0"
         if vuelta > 0:
-            print(self.clima.Ta)
-            print(self.clima.tamb[vuelta])
-            print(resultados[vuelta])
+            # print(self.clima.Ta)
+            # print(self.clima.tamb[vuelta])
+            # print(resultados[vuelta])
             for valor in valores:
                 valor.append(0)
                 # if self.clima.rad[vuelta - 1] >= self.clima.rad[vuelta - 1]:
@@ -280,7 +280,9 @@ class Procesos:
         tiempoActual = 3600
         hrws = (Decimal(0.0000000567) * self.pared.ep) * (self.clima.T15 + self.clima.Ts) * (self.clima.T15 ** 2 + self.clima.Ts ** 2)
         # de donde sale la variable kp
-        To1 = ((sw -(hw *(To - Tf)) - (hrwg * (To - Tg)) - ((self.pared.kp / self.pared.x) * (To - self.clima.T1))) * ((2 * 3600) / (self.pared.cpp * self.pared.densp * self.pared.x))) + To
+        # To1 = ((sw -(hw *(To - Tf)) - (hrwg * (To - Tg)) - ((self.pared.kp / self.pared.x) * (To - self.clima.T1))) * ((2 * 3600) / (self.pared.cpp * self.pared.densp * self.pared.x))) + To
+        To1 = ((sw -(hw *(To - Tf)) - (hrwg * (To - Tg)) - ((self.pared.km / self.pared.xm) * (To - self.clima.T1))) * ((2 * 3600) / (self.pared.cm * self.pared.densm * self.pared.xm))) + To
+
         T11 = (((self.pared.diff * tiempoActual) / self.pared.x ** 2 ) * (self.clima.T15 + To - (2 * self.clima.T1))) + self.clima.T1
         T15_1 = ((((self.pared.kp / self.pared.x) * (self.clima.T1 - self.clima.T15)) - (self.clima.hwind * (self.clima.T15 - self.clima.Ta)) - (hrws * (self.clima.T15 - self.clima.Ts))) * ((2 * tiempoActual) / (self.pared.densp * self.pared.cpp * self.pared.x))) + self.clima.T15
         # self.clima.Ta = self.clima.Ta - 1
