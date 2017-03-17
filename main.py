@@ -68,7 +68,7 @@ dia = climaObj.tamb.__len__()
 vuelta = 1
 while vuelta < dia:
     nuevasTemp = procesos.calcularSegundaFase(flujoMasico[seleccion][2][2], flujoMasico[seleccion][2][3], flujoMasico[seleccion][2][4], flujoMasico[seleccion][2][6], flujoMasico[seleccion][2][7], flujoMasico[seleccion][2][8], vuelta)
-    piscina = procesos.iniciarProcesoSegundaFase(cola, nuevasTemp[0])
+    piscina = procesos.iniciarProcesoSegundaFase(cola, nuevasTemp[0], flujoMasico[seleccion][2][3])
     procesos.esperar(piscina)
     menores = procesos.getMejores(cola)
 

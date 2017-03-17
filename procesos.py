@@ -53,7 +53,7 @@ class Procesos:
         if Tg is None:
             Tg = self.clima.Ta
         if rangoTg is None:
-            rangoTg = Decimal(8)
+            rangoTg = Decimal(4)
         rangoSuperiorTg = Tg + rangoTg
         rangoInferiorTg = Tg
         resultado = []
@@ -66,7 +66,7 @@ class Procesos:
         cant = 0
         variacionProceso = incremento
         i = Tg + Decimal(2)
-        limite = i + 12
+        limite = i + 8
         while (limite >= i):
             # if (limite > divideProcesos):
             #     rangoInferiorTgTmp = rangoInferiorTg
@@ -152,7 +152,7 @@ class Procesos:
             time.sleep(10)
             self.terminarProcesos(piscina)
             timeEnd = timeEnd + 10
-            if timeEnd > 1900:
+            if timeEnd > 1000:
                 print("Tiempo límite exedido de 600 segundos, Fuerzo el cierre!!")
                 self.terminarProcesos(piscina)
                 idProceso = os.getpid()
@@ -247,6 +247,7 @@ class Procesos:
                 TfDif = abs(valor[2][4] - resultados[vuelta][4])
                 if TfDif < 2:
                     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
+
                 #aproximacion a 0 de las temperaturas
                 if abs(valor[2][5]) < 2:
                     valor[valor.__len__() - 1] = valor[valor.__len__() - 1] + 1
@@ -280,8 +281,8 @@ class Procesos:
         tiempoActual = 3600
         hrws = (Decimal(0.0000000567) * self.pared.ep) * (self.clima.T15 + self.clima.Ts) * (self.clima.T15 ** 2 + self.clima.Ts ** 2)
         # de donde sale la variable kp
-        # To1 = ((sw -(hw *(To - Tf)) - (hrwg * (To - Tg)) - ((self.pared.kp / self.pared.x) * (To - self.clima.T1))) * ((2 * 3600) / (self.pared.cpp * self.pared.densp * self.pared.x))) + To
-        To1 = ((sw -(hw *(To - Tf)) - (hrwg * (To - Tg)) - ((self.pared.km / self.pared.xm) * (To - self.clima.T1))) * ((2 * 3600) / (self.pared.cm * self.pared.densm * self.pared.xm))) + To
+        To1 = ((sw -(hw *(To - Tf)) - (hrwg * (To - Tg)) - ((self.pared.kp / self.pared.x) * (To - self.clima.T1))) * ((2 * 3600) / (self.pared.cpp * self.pared.densp * self.pared.x))) + To
+        # To1 = ((sw -(hw *(To - Tf)) - (hrwg * (To - Tg)) - ((self.pared.km / self.pared.xm) * (To - self.clima.T1))) * ((2 * 3600) / (self.pared.cm * self.pared.densm * self.pared.xm))) + To
 
         T11 = (((self.pared.diff * tiempoActual) / self.pared.x ** 2 ) * (self.clima.T15 + To - (2 * self.clima.T1))) + self.clima.T1
         T15_1 = ((((self.pared.kp / self.pared.x) * (self.clima.T1 - self.clima.T15)) - (self.clima.hwind * (self.clima.T15 - self.clima.Ta)) - (hrws * (self.clima.T15 - self.clima.Ts))) * ((2 * tiempoActual) / (self.pared.densp * self.pared.cpp * self.pared.x))) + self.clima.T15
@@ -292,11 +293,11 @@ class Procesos:
         temp = [To1, T11, T15_1]
         return temp
 
-    def iniciarProcesoSegundaFase(self,cola, To):
+    def iniciarProcesoSegundaFase(self,cola, To, Tg):
         piscina = []
         # i = self.clima.Ta - Decimal(2)
-        i = self.clima.Ta - Decimal(10)
-        limite = self.clima.Ta + Decimal(10)
+        i = Tg - Decimal(5)
+        limite = To + Decimal(5)
         cant = 0
         while (limite >= i):
             piscina.append(Process(target=TareaCalcularSegundaFase(To, limite, cola, self.incremento, self.chimenea).calcularSegundaFase))
